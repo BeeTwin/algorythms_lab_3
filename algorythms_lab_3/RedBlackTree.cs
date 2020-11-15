@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace algorythms_lab_3
 {
-    public class RedBlackTreeNode<T> where T : IComparable
+    public class RedBlackTree<T> where T : IComparable
     {
         public enum Color
         {
@@ -16,7 +12,9 @@ namespace algorythms_lab_3
 
         public class Node : IComparable<Node>
         {
-            public T Value;
+            public T Value { get; private set; }
+
+            public Color Color { get; /*private :(*/set; }
 
             private Node _left;
             public Node Left
@@ -42,7 +40,7 @@ namespace algorythms_lab_3
                 }
             }
 
-            public Node _parent;
+            private Node _parent;
             public Node Parent
             {
                 get => _parent;
@@ -50,13 +48,12 @@ namespace algorythms_lab_3
                 {
                     _parent = value;
                     if (value != null)
-                        if (Value.CompareTo(value) > 0)
+                        if (CompareTo(value) > 0)
                             value._right = this;
                         else
                             value._left = this;
                 }
             }
-            public Color Color;
 
             public Node(T value, Node left, Node right, Color color)
             {
@@ -68,6 +65,15 @@ namespace algorythms_lab_3
 
             public Node(T value) : this(value, null, null, Color.Red) { }
 
+            public Node Grandparent 
+                => Parent?.Parent;
+
+            public Node Sibling
+                => this == Parent?.Left ? Parent?.Right : Parent?.Left;
+
+            public Node Unckle 
+                => Parent?.Sibling;
+
             public int CompareTo(Node node)
                 => Value.CompareTo(node.Value);
 
@@ -75,48 +81,7 @@ namespace algorythms_lab_3
                 => $"{Value} - {(Color == Color.Red ? "Red" : "Black")}";
         }
 
-        public Node Root;
-
-        private Node GetGrandparent(Node node) => node?.Parent?.Parent;
-
-        private Node GetUnckle(Node node)
-        {
-            var grandparent = GetGrandparent(node);
-            return node?.Parent == grandparent?.Left ? grandparent?.Right : grandparent?.Left;
-        }
-
-        public void RotateLeft(Node node)
-        {
-            /*    
-            struct node *pivot = n->right;
-            pivot->parent = n->parent; 
-            if (n->parent != NULL)
-            {
-                if (n->parent->left == n)
-                    n->parent->left = pivot;
-                else
-                    n->parent->right = pivot;
-            }
-            n->right = pivot->left;
-            if (pivot->left != NULL)
-                pivot->left->parent = n;
-            n->parent = pivot;
-            pivot->left = n;
-            */
-
-            var pivot = node.Right;
-            pivot.Parent = node.Parent;
-            if (node.Parent == null)
-            {
-                Root = pivot;
-
-            }
-        }
-
-        private void RotateRight(Node node)
-        {
-
-        }
+        public Node Root { get; private set; }
 
         public void Insert(T value)
         {
@@ -127,38 +92,93 @@ namespace algorythms_lab_3
                     currentNode = (currentNode.Right ??= goal);
                 else
                     currentNode = (currentNode.Left ??= goal);
-            CheckCase_1(currentNode);
+            InsertCase_1(currentNode);
         }
 
-        private void CheckCase_1(Node node)
+        public Node Find(T value)
+        {
+            var currentNode = Root;
+            int cmp;
+            while (currentNode != null)
+                if ((cmp = value.CompareTo(currentNode.Value)) > 0)
+                    currentNode = currentNode.Right;
+                else if (cmp < 0)
+                    currentNode = currentNode.Left;
+                else
+                    break;
+            return currentNode;
+        }
+
+        public Node Min(Node node)
+        {
+            var currentNode = node;
+            while (currentNode.Left != null)
+                currentNode = currentNode.Left;
+            return currentNode;
+        }
+
+        public Node Max(Node node)
+        {
+            var currentNode = node;
+            while (currentNode.Right != null)
+                currentNode = currentNode.Right;
+            return currentNode;
+        }
+
+        public void Remove(T value)
+        {
+            var removing = Find(value);
+            if (removing == null)
+                return;
+
+        }
+
+        private void RotateLeft(Node node)
+        {
+            var pivot = node.Right;
+            pivot.Parent = node.Parent;
+            if (Root == node)
+                Root = pivot;
+            node.Right = pivot.Left;
+            pivot.Left = node;
+        }
+
+        private void RotateRight(Node node)
+        {
+            var pivot = node.Left;
+            pivot.Parent = node.Parent;
+            if (Root == node)
+                Root = pivot;
+            node.Left = pivot.Right;
+            pivot.Right = node;
+        }
+
+        private void InsertCase_1(Node node)
         {
             if (node.Parent == null)
-            {
-                Root = node;
                 node.Color = Color.Black;
-            }
             else if (node.Parent.Color == Color.Red)
-                CheckCase_2(node);
+                InsertCase_2(node);
         }
 
-        private void CheckCase_2(Node node)
+        private void InsertCase_2(Node node)
         {
-            var uncle = GetUnckle(node);
+            var uncle = node.Unckle;
             if (uncle != null && uncle.Color == Color.Red)
             {
                 node.Parent.Color = Color.Black;
                 uncle.Color = Color.Black;
-                var grandparent = GetGrandparent(node);
+                var grandparent = node.Grandparent;
                 grandparent.Color = Color.Red;
-                CheckCase_1(grandparent);
+                InsertCase_1(grandparent);
             }
             else
-                CheckCase_3(node);
+                InsertCase_3(node);
         }
 
-        private void CheckCase_3(Node node)
+        private void InsertCase_3(Node node)
         {
-            var grandparent = GetGrandparent(node);
+            var grandparent = node.Grandparent;
             if(node == node.Parent.Right && node.Parent == grandparent.Left)
             {
                 RotateLeft(node.Parent);
@@ -169,12 +189,12 @@ namespace algorythms_lab_3
                 RotateRight(node.Parent);
                 node = node.Right;
             }
-            CheckCase_4(node);
+            InsertCase_4(node);
         }
 
-        private void CheckCase_4(Node node)
+        private void InsertCase_4(Node node)
         {
-            var grandparent = GetGrandparent(node);
+            var grandparent = node.Grandparent;
             node.Parent.Color = Color.Black;
             grandparent.Color = Color.Red;
             if (node == node.Parent.Left && node.Parent == grandparent.Left)

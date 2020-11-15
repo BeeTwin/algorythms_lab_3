@@ -11,7 +11,7 @@ namespace algorythms_lab_3
 
         private static void _Test()
         {
-            var a = new RedBlackTreeNode<int>();
+            var a = new RedBlackTree<int>();
             a.Insert(14);
             a.Insert(20);
             a.Insert(100);
@@ -23,6 +23,7 @@ namespace algorythms_lab_3
             a.Insert(22);
             a.Insert(30);
             a.Insert(56);
+            a.Remove(20);
             a.Insert(101);
             a.Insert(71);
             a.Insert(4);
