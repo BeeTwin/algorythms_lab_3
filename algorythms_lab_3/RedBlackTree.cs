@@ -128,9 +128,9 @@ namespace algorythms_lab_3
             else
             {
                 if (isLeft)
-                    nextValueNode.Parent.Left = nextValueNode.Left;
+                    nextValueNode.Parent.Left = nextValueNode.Right; // первого?
                 else
-                    nextValueNode.Parent.Right = nextValueNode.Left;
+                    nextValueNode.Parent.Right = nextValueNode.Right; // первого?
             }
             return nextValueNode;
         }
@@ -139,18 +139,68 @@ namespace algorythms_lab_3
         {
             bool isLeft = currentNode.Parent.Left == currentNode;
             while (currentNode.Color == Color.Black && currentNode != Root)
-                if(isLeft)
+                if (isLeft)
+                    currentNode = FixRemovingIfLeftChild(currentNode);
+                else
+                    currentNode = FixRemovingIfRightChild(currentNode);
+            currentNode.Color = Color.Black;
+            Root.Color = Color.Black;
+        }
+
+        private Node FixRemovingIfLeftChild(Node currentNode)
+        {
+            if (currentNode.Sibling.Color == Color.Red)
+            {
+                currentNode.Sibling.Color = Color.Black;
+                currentNode.Parent.Color = Color.Red;
+                Rotate(currentNode.Parent, Direction.Left);
+            }
+            if (currentNode.Sibling.Left.Color == Color.Black
+                && currentNode.Sibling.Right.Color == Color.Black)
+                currentNode.Sibling.Color = Color.Red;
+            else
+            {
+                if (currentNode.Sibling.Right.Color == Color.Black)
                 {
-                    if(currentNode.Sibling.Color == Color.Red)
-                    {
-                        currentNode.Sibling.Color = Color.Black;
-                        currentNode.Parent.Color = Color.Red;
-                        Rotate(currentNode.Parent, Direction.Left);
-                    }
-                    if (currentNode.Sibling.Left.Color == Color.Black
-                        && currentNode.Sibling.Right.Color == Color.Black)
-                        currentNode.Sibling.Color = Color.Red;
+                    currentNode.Sibling.Left.Color = Color.Black;
+                    currentNode.Sibling.Color = Color.Red;
+                    Rotate(currentNode.Sibling, Direction.Right);
                 }
+                currentNode.Sibling.Color = currentNode.Parent.Color;
+                currentNode.Parent.Color = Color.Black;
+                currentNode.Sibling.Right.Color = Color.Black;
+                Rotate(currentNode.Parent, Direction.Left);
+                currentNode = Root; //?
+            }
+            return currentNode;
+        }
+
+        private Node FixRemovingIfRightChild(Node currentNode)
+        {
+            if (currentNode.Sibling.Color == Color.Red)
+            {
+                currentNode.Sibling.Color = Color.Black;
+                currentNode.Parent.Color = Color.Red;
+                Rotate(currentNode.Parent, Direction.Right);
+            }
+            if (currentNode.Sibling.Left.Color == Color.Black
+                && currentNode.Sibling.Right.Color == Color.Black)
+                currentNode.Sibling.Color = Color.Red;
+            else
+            {
+                if (currentNode.Sibling.Left.Color == Color.Black)
+                {
+                    currentNode.Sibling.Right.Color = Color.Black;
+                    currentNode.Sibling.Color = Color.Red;
+                    Rotate(currentNode.Sibling, Direction.Left);
+                }
+                currentNode.Sibling.Color = currentNode.Parent.Color;
+                currentNode.Parent.Color = Color.Black;
+                currentNode.Sibling.Left.Color = Color.Black;
+                Rotate(currentNode.Parent, Direction.Right);
+                currentNode = Root; //?
+            }
+            return currentNode;
         }
 
         private void InsertCase_1(Node node)
