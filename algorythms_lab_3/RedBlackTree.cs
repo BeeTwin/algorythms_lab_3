@@ -2,14 +2,14 @@
 
 namespace algorythms_lab_3
 {
-    public class RedBlackTree<T> where T : IComparable
+    public sealed class RedBlackTree<T> where T : IComparable
     {
         private Node _root;
         public Node Root
         {
             get
             {
-                if (_root.Parent == null)
+                if (_root?.Parent == null)
                     return _root;
                 else
                 {
@@ -64,10 +64,11 @@ namespace algorythms_lab_3
                 return (isNext ? node.Right.Min() : node.Left.Max());
             else
                 while (currentNode != null
-                        && (isNext ? currentNode : node).CompareTo(isNext ? node : currentNode) >= 0)
+                        && ((isNext ? currentNode : node).CompareTo(isNext ? node : currentNode) <= 0))
                     currentNode = currentNode.Parent;
             return currentNode;
         }
+
         public Node Min() => Root.Min();
 
         public Node Max() => Root.Max();
@@ -155,7 +156,7 @@ namespace algorythms_lab_3
         private void InsertCase_1(Node node)
         {
             if (node.Parent == null)
-                node.SetColor(Color.Black);
+                node.Color = Color.Black;
             else if (node.Parent.Color == Color.Red)
                 InsertCase_2(node);
         }
@@ -165,10 +166,10 @@ namespace algorythms_lab_3
             var uncle = node.Uncle;
             if (uncle != null && uncle.Color == Color.Red)
             {
-                node.Parent.SetColor(Color.Black);
-                uncle.SetColor(Color.Black);
+                node.Parent.Color = Color.Black;
+                uncle.Color = Color.Black;
                 var grandparent = node.Grandparent;
-                grandparent.SetColor(Color.Red);
+                grandparent.Color = Color.Red;
                 InsertCase_1(grandparent);
             }
             else
@@ -194,8 +195,8 @@ namespace algorythms_lab_3
         private void InsertCase_4(Node node)
         {
             var grandparent = node.Grandparent;
-            node.Parent.SetColor(Color.Black);
-            grandparent.SetColor(Color.Red);
+            node.Parent.Color = Color.Black;
+            grandparent.Color = Color.Red;
             Rotate(
                 grandparent, 
                 node == node.Parent.Left 
@@ -217,13 +218,13 @@ namespace algorythms_lab_3
         {
             public T Value { get; private set; }
 
-            internal Color Color { get; set; }
+            public Color Color { get; internal set; } //help
 
             private Node _left;
             public Node Left
             {
                 get => _left;
-                set
+                internal set
                 {
                     _left = value;
                     if (value != null)
@@ -235,7 +236,7 @@ namespace algorythms_lab_3
             public Node Right
             {
                 get => _right;
-                set
+                internal set
                 {
                     _right = value;
                     if (value != null)
@@ -247,7 +248,7 @@ namespace algorythms_lab_3
             public Node Parent
             {
                 get => _parent;
-                set
+                internal set
                 {
                     _parent = value;
                     if (value != null)
@@ -258,15 +259,11 @@ namespace algorythms_lab_3
                 }
             }
 
-            public Node(T value, Node left, Node right, Color color)
+            public Node(T value) 
             {
                 Value = value;
-                Left = left;
-                Right = right;
-                Color = color;
+                Color = Color.Red;
             }
-
-            public Node(T value) : this(value, null, null, Color.Red) { }
 
             public Node Grandparent
                 => Parent?.Parent;
@@ -276,9 +273,6 @@ namespace algorythms_lab_3
 
             public Node Uncle
                 => Parent?.Sibling;
-
-            public void SetColor(Color color)
-                => Color = color;
 
             public Node Min()
             {

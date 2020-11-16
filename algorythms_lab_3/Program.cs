@@ -12,18 +12,20 @@ namespace algorythms_lab_3
         private static void _Test()
         {
             var a = new RedBlackTree<int>();
-            var b = a.Root.Color;
             
             a.Insert(14);
-            a.Root.Color = RedBlackTree<int>.Color.Red;
+
             a.Insert(20);
+            var c = a.FindPrevious(20);
             a.Insert(100);
+            var b = a.FindNext(20);
             a.Insert(13);
             a.Insert(2);
             a.Insert(3);
             a.Insert(5);
             a.Insert(6);
             a.Insert(22);
+            var b1 = a.FindNext(20);
             a.Insert(30);
             a.Insert(56);
             a.Remove(20);
