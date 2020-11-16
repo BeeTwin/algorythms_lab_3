@@ -74,10 +74,82 @@ namespace algorythms_lab_3
 
         public void Remove(T value)
         {
-            var removing = Find(value);
-            if (removing == null)
-                return;
+            Node deletingNode = Find(value);
+            bool isLeft = deletingNode.Parent.Left == deletingNode;
+            Node nextValueNode = null;
+            if (deletingNode.Left.Value == null && deletingNode.Right.Value == null) //haven't childs
+                deletingNode = RemoveWithoutChilds(deletingNode, isLeft);
+            if (deletingNode.Left.Value != null || deletingNode.Right.Value != null) // have one child
+                deletingNode = RemoveWithOneChild(deletingNode, isLeft);
+            else //have two childs
+                nextValueNode = RemoveWithTwoChilds(deletingNode, isLeft);
+            if(deletingNode != nextValueNode)
+            {
+                deletingNode.Color = nextValueNode.Color;
+               // deletingNode.Value = nextValueNode.Value;
+            }
+            if (nextValueNode.Color == Color.Black)
+                FixRemoving(deletingNode);
+        }
 
+        private Node RemoveWithoutChilds(Node deletingNode, bool isLeft)
+        {
+            if (deletingNode == Root)
+                Root = null;
+            else
+            {
+                if (isLeft)
+                    deletingNode.Parent.Left = null;
+                else
+                    deletingNode.Parent.Right = null;
+            }
+            return deletingNode;
+        }
+
+        private Node RemoveWithOneChild(Node deletingNode, bool isLeft)
+        {
+            if (isLeft)
+                deletingNode.Parent.Left =
+                    deletingNode.Left.Value != null ? deletingNode.Left : deletingNode.Right;
+            else
+                deletingNode.Parent.Right =
+                    deletingNode.Left.Value != null ? deletingNode.Left : deletingNode.Right;
+            return deletingNode;
+        }
+
+        private Node RemoveWithTwoChilds(Node deletingNode, bool isLeft)
+        {
+            Node nextValueNode = FindNear(deletingNode.Value, Direction.Right);
+            if (nextValueNode.Right.Value != null)
+                nextValueNode.Right.Parent = nextValueNode.Parent;
+            if (nextValueNode == Root)
+                Root = nextValueNode.Right;
+            else
+            {
+                if (isLeft)
+                    nextValueNode.Parent.Left = nextValueNode.Left;
+                else
+                    nextValueNode.Parent.Right = nextValueNode.Left;
+            }
+            return nextValueNode;
+        }
+
+        private void FixRemoving(Node currentNode)
+        {
+            bool isLeft = currentNode.Parent.Left == currentNode;
+            while (currentNode.Color == Color.Black && currentNode != Root)
+                if(isLeft)
+                {
+                    if(currentNode.Sibling.Color == Color.Red)
+                    {
+                        currentNode.Sibling.Color = Color.Black;
+                        currentNode.Parent.Color = Color.Red;
+                        Rotate(currentNode.Parent, Direction.Left);
+                    }
+                    if (currentNode.Sibling.Left.Color == Color.Black
+                        && currentNode.Sibling.Right.Color == Color.Black)
+                        currentNode.Sibling.Color = Color.Red;
+                }
         }
 
         private void InsertCase_1(Node node)
