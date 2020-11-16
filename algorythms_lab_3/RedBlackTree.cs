@@ -60,7 +60,7 @@ namespace algorythms_lab_3
             var isNext = direction == Direction.Right;
             var node = Find(value);
             var currentNode = node;
-            if ((isNext ? node.Right : node.Left) != null)
+            if ((isNext ? node?.Right : node?.Left) != null)
                 return (isNext ? node.Right.Min() : node.Left.Max());
             else
                 while (currentNode != null
@@ -76,21 +76,41 @@ namespace algorythms_lab_3
         public void Remove(T value)
         {
             Node deletingNode = Find(value);
-            bool isLeft = deletingNode.Parent.Left == deletingNode;
+            bool isLeft = deletingNode?.Parent?.Left == deletingNode;
             Node nextValueNode = null;
-            if (deletingNode.Left.Value == null && deletingNode.Right.Value == null) //haven't childs
+            if (deletingNode.Left == null && deletingNode.Right == null) //haven't childs
                 deletingNode = RemoveWithoutChilds(deletingNode, isLeft);
-            if (deletingNode.Left.Value != null || deletingNode.Right.Value != null) // have one child
+            if ((deletingNode.Left != null && deletingNode.Right == null) || (deletingNode.Left == null && deletingNode.Right != null)) // have one child
                 deletingNode = RemoveWithOneChild(deletingNode, isLeft);
-            else //have two childs
+            else if(deletingNode.Left != null && deletingNode.Right != null)//have two childs
                 nextValueNode = RemoveWithTwoChilds(deletingNode, isLeft);
-            if(deletingNode != nextValueNode)
+            if (nextValueNode != null)
             {
-                deletingNode.Color = nextValueNode.Color;
-               // deletingNode.Value = nextValueNode.Value;
+                if (deletingNode != nextValueNode)
+                {
+                    if(deletingNode == Root)
+                        Root.Color = Color.Black;
+                    else
+                        deletingNode.Color = nextValueNode.Color;
+                    //deletingNode.Value = nextValueNode.Value;
+                    // _ = nextValueNode.Parent.Left == nextValueNode ?
+                    //   nextValueNode.Parent.Left = null : nextValueNode.Parent.Right = null;
+                    if (deletingNode != Root)
+                        _ = deletingNode?.Parent?.Left != null ?
+                            deletingNode = nextValueNode : deletingNode.Parent.Left = nextValueNode;
+                    nextValueNode.Left = deletingNode.Left != null ? deletingNode.Left : null;
+                    nextValueNode.Right = deletingNode.Right != null ? deletingNode.Right : null;
+                    if (deletingNode == Root)
+                    {
+                        _ = nextValueNode?.Parent?.Left == nextValueNode ?
+                         nextValueNode.Parent.Left = null : nextValueNode.Parent.Right = null;
+                        Root = nextValueNode;
+                    }
+
+                }
+                if (nextValueNode.Color == Color.Black)
+                    FixRemoving(deletingNode);
             }
-            if (nextValueNode.Color == Color.Black)
-                FixRemoving(deletingNode);
         }
 
         private Node RemoveWithoutChilds(Node deletingNode, bool isLeft)
@@ -120,17 +140,29 @@ namespace algorythms_lab_3
 
         private Node RemoveWithTwoChilds(Node deletingNode, bool isLeft)
         {
-            Node nextValueNode = FindNear(deletingNode.Value, Direction.Right);
-            if (nextValueNode.Right.Value != null)
+            Node nextValueNode = FindNear(deletingNode.Value, Direction.Left);
+            if (nextValueNode?.Right != null)
                 nextValueNode.Right.Parent = nextValueNode.Parent;
-            if (nextValueNode == Root)
-                Root = nextValueNode.Right;
+            if (deletingNode == Root)
+                Root = nextValueNode;
             else
             {
                 if (isLeft)
-                    nextValueNode.Parent.Left = nextValueNode.Right; // первого?
+                {
+                    _ = nextValueNode.Parent.Left == nextValueNode ?
+                        nextValueNode.Parent.Left = null : nextValueNode.Parent.Right = null;
+                    deletingNode.Parent.Left = nextValueNode; // первого? ?.Right
+                    nextValueNode.Left = deletingNode.Left != null ? deletingNode.Left : null;
+                    nextValueNode.Right = deletingNode.Right != null ? deletingNode.Right : null;
+                }
                 else
-                    nextValueNode.Parent.Right = nextValueNode.Right; // первого?
+                {
+                    _ = nextValueNode.Parent.Left == nextValueNode ?
+                        nextValueNode.Parent.Left = null : nextValueNode.Parent.Right = null;
+                    deletingNode.Parent.Right = nextValueNode; // первого?
+                    nextValueNode.Left = deletingNode.Left != null ? deletingNode.Left : null;
+                    nextValueNode.Right = deletingNode.Right != null ? deletingNode.Right : null;
+                }
             }
             return nextValueNode;
         }
@@ -170,7 +202,7 @@ namespace algorythms_lab_3
                 currentNode.Parent.Color = Color.Black;
                 currentNode.Sibling.Right.Color = Color.Black;
                 Rotate(currentNode.Parent, Direction.Left);
-                currentNode = Root; //?
+                currentNode.Color = Root.Color; //?
             }
             return currentNode;
         }
