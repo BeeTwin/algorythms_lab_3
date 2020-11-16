@@ -6,7 +6,8 @@ namespace algorythms_lab_3
     {
         static void Main(string[] args)
         {
-            _Test();
+            var consoleRBT = new ConsoleRBT();
+            consoleRBT.StartConsoleProccessing();
         }
 
         private static void _Test()
