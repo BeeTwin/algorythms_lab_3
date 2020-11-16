@@ -4,17 +4,148 @@ namespace algorythms_lab_3
 {
     public class RedBlackTree<T> where T : IComparable
     {
-        public enum Color
+        private Node _root;
+        public Node Root
         {
-            Black,
-            Red
+            get
+            {
+                if (_root.Parent == null)
+                    return _root;
+                else
+                {
+                    _root = _root.Parent;
+                    return Root;
+                }
+            }
+            private set 
+            {
+                _root = value; 
+            }             
+        }
+
+        public void Insert(T value)
+        {
+            var goal = new Node(value);
+            var currentNode = Root ??= goal;
+            while (currentNode != goal)
+                if (goal.CompareTo(currentNode) >= 0)
+                    currentNode = (currentNode.Right ??= goal);
+                else
+                    currentNode = (currentNode.Left ??= goal);
+            InsertCase_1(currentNode);
+        }
+
+        public Node Find(T value)
+        {
+            var currentNode = Root;
+            int cmp;
+            while (currentNode != null)
+                if ((cmp = value.CompareTo(currentNode.Value)) > 0)
+                    currentNode = currentNode.Right;
+                else if (cmp < 0)
+                    currentNode = currentNode.Left;
+                else
+                    break;
+            return currentNode;
+        }
+
+        public Node FindPrevious(T value)
+            => FindNear(value, Direction.Left);
+
+        public Node FindNext(T value)
+            => FindNear(value, Direction.Right);
+
+        private Node FindNear(T value, Direction direction)
+        {
+            var isNext = direction == Direction.Right;
+            var node = Find(value);
+            var currentNode = node;
+            if ((isNext ? node.Right : node.Left) != null)
+                return (isNext ? node.Right.Min() : node.Left.Max());
+            else
+                while (currentNode != null
+                        && (isNext ? currentNode : node).CompareTo(isNext ? node : currentNode) >= 0)
+                    currentNode = currentNode.Parent;
+            return currentNode;
+        }
+        public Node Min() => Root.Min();
+
+        public Node Max() => Root.Max();
+
+        public void Remove(T value)
+        {
+            var removing = Find(value);
+            if (removing == null)
+                return;
+
+        }
+
+        private void InsertCase_1(Node node)
+        {
+            if (node.Parent == null)
+                node.SetColor(Color.Black);
+            else if (node.Parent.Color == Color.Red)
+                InsertCase_2(node);
+        }
+
+        private void InsertCase_2(Node node)
+        {
+            var uncle = node.Uncle;
+            if (uncle != null && uncle.Color == Color.Red)
+            {
+                node.Parent.SetColor(Color.Black);
+                uncle.SetColor(Color.Black);
+                var grandparent = node.Grandparent;
+                grandparent.SetColor(Color.Red);
+                InsertCase_1(grandparent);
+            }
+            else
+                InsertCase_3(node);
+        }
+
+        private void InsertCase_3(Node node)
+        {
+            var grandparent = node.Grandparent;
+            if (node == node.Parent.Right && node.Parent == grandparent.Left)
+            {
+                Rotate(node.Parent, Direction.Left);
+                node = node.Left;
+            }
+            else if (node == node.Parent.Left && node.Parent == grandparent.Right)
+            {
+                Rotate(node.Parent, Direction.Right);
+                node = node.Right;
+            }
+            InsertCase_4(node);
+        }
+
+        private void InsertCase_4(Node node)
+        {
+            var grandparent = node.Grandparent;
+            node.Parent.SetColor(Color.Black);
+            grandparent.SetColor(Color.Red);
+            Rotate(
+                grandparent, 
+                node == node.Parent.Left 
+                && node.Parent == grandparent.Left 
+                    ? Direction.Right 
+                    : Direction.Left);
+        }
+
+        private void Rotate(Node node, Direction direction)
+        {
+            var isRight = direction == Direction.Right;
+            var pivot = isRight ? node.Left : node.Right;
+            pivot.Parent = node.Parent;
+            _ = isRight ? node.Left = pivot.Right : node.Right = pivot.Left;
+            _ = isRight ? pivot.Right = node : pivot.Left = node;
         }
 
         public class Node : IComparable<Node>
         {
             public T Value { get; private set; }
 
-            public Color Color { get; /*private :(*/set; }
+            internal Color Color { get; set; }
 
             private Node _left;
             public Node Left
@@ -65,142 +196,51 @@ namespace algorythms_lab_3
 
             public Node(T value) : this(value, null, null, Color.Red) { }
 
-            public Node Grandparent 
+            public Node Grandparent
                 => Parent?.Parent;
 
             public Node Sibling
                 => this == Parent?.Left ? Parent?.Right : Parent?.Left;
 
-            public Node Unckle 
+            public Node Uncle
                 => Parent?.Sibling;
+
+            public void SetColor(Color color)
+                => Color = color;
+
+            public Node Min()
+            {
+                var currentNode = this;
+                while (currentNode.Left != null)
+                    currentNode = currentNode.Left;
+                return currentNode;
+            }
+
+            public Node Max()
+            {
+                var currentNode = this;
+                while (currentNode.Right != null)
+                    currentNode = currentNode.Right;
+                return currentNode;
+            }
 
             public int CompareTo(Node node)
                 => Value.CompareTo(node.Value);
 
             public override string ToString()
-                => $"{Value} - {(Color == Color.Red ? "Red" : "Black")}";
+                => $"{Value} - {Color}";
         }
 
-        public Node Root { get; private set; }
-
-        public void Insert(T value)
+        public enum Color
         {
-            var goal = new Node(value);
-            var currentNode = Root ??= goal;
-            while (currentNode != goal)
-                if (goal.CompareTo(currentNode) >= 0)
-                    currentNode = (currentNode.Right ??= goal);
-                else
-                    currentNode = (currentNode.Left ??= goal);
-            InsertCase_1(currentNode);
+            Black,
+            Red
         }
 
-        public Node Find(T value)
+        private enum Direction
         {
-            var currentNode = Root;
-            int cmp;
-            while (currentNode != null)
-                if ((cmp = value.CompareTo(currentNode.Value)) > 0)
-                    currentNode = currentNode.Right;
-                else if (cmp < 0)
-                    currentNode = currentNode.Left;
-                else
-                    break;
-            return currentNode;
-        }
-
-        public Node Min(Node node)
-        {
-            var currentNode = node;
-            while (currentNode.Left != null)
-                currentNode = currentNode.Left;
-            return currentNode;
-        }
-
-        public Node Max(Node node)
-        {
-            var currentNode = node;
-            while (currentNode.Right != null)
-                currentNode = currentNode.Right;
-            return currentNode;
-        }
-
-        public void Remove(T value)
-        {
-            var removing = Find(value);
-            if (removing == null)
-                return;
-
-        }
-
-        private void RotateLeft(Node node)
-        {
-            var pivot = node.Right;
-            pivot.Parent = node.Parent;
-            if (Root == node)
-                Root = pivot;
-            node.Right = pivot.Left;
-            pivot.Left = node;
-        }
-
-        private void RotateRight(Node node)
-        {
-            var pivot = node.Left;
-            pivot.Parent = node.Parent;
-            if (Root == node)
-                Root = pivot;
-            node.Left = pivot.Right;
-            pivot.Right = node;
-        }
-
-        private void InsertCase_1(Node node)
-        {
-            if (node.Parent == null)
-                node.Color = Color.Black;
-            else if (node.Parent.Color == Color.Red)
-                InsertCase_2(node);
-        }
-
-        private void InsertCase_2(Node node)
-        {
-            var uncle = node.Unckle;
-            if (uncle != null && uncle.Color == Color.Red)
-            {
-                node.Parent.Color = Color.Black;
-                uncle.Color = Color.Black;
-                var grandparent = node.Grandparent;
-                grandparent.Color = Color.Red;
-                InsertCase_1(grandparent);
-            }
-            else
-                InsertCase_3(node);
-        }
-
-        private void InsertCase_3(Node node)
-        {
-            var grandparent = node.Grandparent;
-            if(node == node.Parent.Right && node.Parent == grandparent.Left)
-            {
-                RotateLeft(node.Parent);
-                node = node.Left;
-            }
-            else if (node == node.Parent.Left && node.Parent == grandparent.Right)
-            {
-                RotateRight(node.Parent);
-                node = node.Right;
-            }
-            InsertCase_4(node);
-        }
-
-        private void InsertCase_4(Node node)
-        {
-            var grandparent = node.Grandparent;
-            node.Parent.Color = Color.Black;
-            grandparent.Color = Color.Red;
-            if (node == node.Parent.Left && node.Parent == grandparent.Left)
-                RotateRight(grandparent);
-            else
-                RotateLeft(grandparent);
+            Left,
+            Right
         }
     }
 }

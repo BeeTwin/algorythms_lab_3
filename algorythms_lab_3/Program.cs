@@ -12,7 +12,10 @@ namespace algorythms_lab_3
         private static void _Test()
         {
             var a = new RedBlackTree<int>();
+            var b = a.Root.Color;
+            
             a.Insert(14);
+            a.Root.Color = RedBlackTree<int>.Color.Red;
             a.Insert(20);
             a.Insert(100);
             a.Insert(13);
