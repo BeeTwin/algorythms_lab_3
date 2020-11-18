@@ -23,6 +23,12 @@ namespace algorythms_lab_3
             }             
         }
 
+        public void Insert(params T[] values)
+        {
+            foreach (var value in values)
+                Insert(value);
+        }
+
         public void Insert(T value)
         {
             var goal = new Node(value);

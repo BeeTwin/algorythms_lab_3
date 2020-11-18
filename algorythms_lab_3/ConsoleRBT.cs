@@ -33,7 +33,8 @@ namespace algorythms_lab_3
             SetCursorPosition(5, 3);
             if (ReadLine() == "y")
             {
-                AppendTree(25, 1, 999);
+                //AppendTree(25, 1, 999);
+                _TestTree();
                 DrawTree();
             }
             ClearBoxes();
@@ -73,6 +74,11 @@ namespace algorythms_lab_3
             }
         }
 
+        private void _TestTree()
+        {
+            _tree.Insert(14, 20, 100, 13, 2, 3, 5, 6, 22, 30, 56, 101, 71, 4, 8, 72);
+        }
+
         private void DrawTree()
         {
             ClearTreeSpace();
@@ -91,13 +97,13 @@ namespace algorythms_lab_3
 
             if (node.Right != null)
             {
-                Out("════", x + 3, y);
-                y = DrawTree(node.Right, x + 7, y);
+                Out("══", x + 3, y);
+                y = DrawTree(node.Right, x + 5, y);
             }
             else if (_isShowingNILs)
             {
-                Out("════", x + 3, y);
-                ColorOut(ConsoleColor.Black, ConsoleColor.DarkGray, "NIL", x + 7, y);
+                Out("══", x + 3, y);
+                ColorOut(ConsoleColor.Black, ConsoleColor.DarkGray, "NIL", x + 5, y);
             }
 
             if (node.Left != null)
@@ -197,13 +203,11 @@ namespace algorythms_lab_3
         {
             var line = new string('═', WindowWidth - 2);
             var emptyLine = new string(' ', WindowWidth - 2);
-            string str = "";
-            str += '╔'     + line      +    '╗' + "\n";
-            str += '║'     + emptyLine +    '║' + "\n";
-            str += '╠'     + line      +    '╣' + "\n";
-            str += '║'     + emptyLine +    '║' + "\n";
-            str += '╚'     + line      +    '╝' + "\n";
-            Out(str, 0, 0);
+            Out('╔'     + line      +    '╗', 0, 0);
+            Out('║'     + emptyLine +    '║', 0, 1);
+            Out('╠'     + line      +    '╣', 0, 2);
+            Out('║'     + emptyLine +    '║', 0, 3);
+            Out('╚'     + line      +    '╝', 0, 4);
         }
 
         private void InitializeCommands()
