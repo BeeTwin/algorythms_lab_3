@@ -33,7 +33,7 @@ namespace algorythms_lab_3
             a.Remove(100);
             a.Remove(13);
             a.Remove(2);
-            a.Remove(3);
+            a.Remove(30);
 
         }
     }
