@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using static System.Console;
-using System.Text;
 using System.Linq;
 
 namespace algorythms_lab_3
 {
     public class ConsoleRBT
     {
-        private readonly RedBlackTree<int> _tree = new RedBlackTree<int>();
+        private RedBlackTree<int> _tree = new RedBlackTree<int>();
 
         private readonly Dictionary<Command, Func<int, string>> _commands = new Dictionary<Command, Func<int, string>>();
 
         private readonly Dictionary<Message, Action<string>> _messages = new Dictionary<Message, Action<string>>();
 
         private bool _flag = true;
+        private bool _isShowingNILs = false;
 
         private HashSet<int> _keys = new HashSet<int>();
         
@@ -33,7 +33,7 @@ namespace algorythms_lab_3
             SetCursorPosition(5, 3);
             if (ReadLine() == "y")
             {
-                GenerateTree(25, 1, 100);
+                AppendTree(25, 1, 999);
                 DrawTree();
             }
             ClearBoxes();
@@ -52,14 +52,14 @@ namespace algorythms_lab_3
                     _messages[Message.IncorrectInput](null);
                 else
                 {
-                    if (IsInputRight(command, args))
+                    if (IsInputRight(command, args) && input.Length <= 2)
                     {
                         int intArgs = -1;
                         if (args == null)
                         {
                             if (command == Command.Min || command == Command.Max)
                                 intArgs = _tree.Root.Value;
-                            else if (command == Command.Help || command == Command.Quit)
+                            else if (command == Command.Help || command == Command.Clear)
                                 intArgs = -1;
                         }
                         else
@@ -68,7 +68,7 @@ namespace algorythms_lab_3
                     }
                     else
                         _messages[Message.IncorrectArguments](
-                            $"{command}{(IsConsole(command) ? "" : IsSingular(command) ? " [value (you can input w/o value)]" : " [value]")}");
+                            $"{command}{(IsConsole(command) ? command == Command.Help ? " [(optional) page]" : "" : IsSingular(command) ? " [(optional) int]" : " [int]")}");
                 }
             }
         }
@@ -91,8 +91,13 @@ namespace algorythms_lab_3
 
             if (node.Right != null)
             {
-                Out("══", x + 3, y);
-                y = DrawTree(node.Right, x + 5, y);
+                Out("════", x + 3, y);
+                y = DrawTree(node.Right, x + 7, y);
+            }
+            else if (_isShowingNILs)
+            {
+                Out("════", x + 3, y);
+                ColorOut(ConsoleColor.Black, ConsoleColor.DarkGray, "NIL", x + 7, y);
             }
 
             if (node.Left != null)
@@ -104,8 +109,18 @@ namespace algorythms_lab_3
                 }
                 y = DrawTree(node.Left, x, y + 2);
             }
+            else if (_isShowingNILs)
+            {
+                while (loc <= y)
+                {
+                    Out(" ║", x, loc + 1);
+                    loc++;
+                }
+                ColorOut(ConsoleColor.Black, ConsoleColor.DarkGray, "NIL", x, y + 2);
+                y += 2;
+            }
 
-            SetCursorPosition(0, 0);
+                SetCursorPosition(0, 0);
             return y;
         }
 
@@ -136,6 +151,8 @@ namespace algorythms_lab_3
                 case Command.FindNext:
                 case Command.FindPrev:
                     return _keys.Contains(args);
+                case Command.GenerateTree:
+                    return !_keys.Any();
                 default: 
                     return false;
             }
@@ -150,15 +167,18 @@ namespace algorythms_lab_3
 
         private bool IsSingular(Command command) => command == Command.Min || command == Command.Max;
 
-        private bool IsConsole(Command command) => command == Command.Help || command == Command.Quit;
+        private bool IsConsole(Command command) => command == Command.Help || command == Command.Clear;
 
         private bool IsInputRight(Command command, string args)
         { 
             switch (command)
             {
-                case Command.Help: 
-                case Command.Quit:
+                case Command.Clear:
+                case Command.GenerateTree:
+                case Command.ShowNILs:
+                case Command.HideNILs:
                     return args == null;
+                case Command.Help:
                 case Command.Min:
                 case Command.Max:
                     return args == null || int.TryParse(args, out var _);
@@ -167,7 +187,7 @@ namespace algorythms_lab_3
                 case Command.Find: 
                 case Command.FindNext: 
                 case Command.FindPrev:
-                    return int.TryParse(args, out var _);
+                    return int.TryParse(args, out var intArgs);
                 default:
                     return false;
             }
@@ -189,16 +209,33 @@ namespace algorythms_lab_3
         private void InitializeCommands()
         {
             _commands[Command.Help]     = (value) => 
-            { 
-                _messages[Message.Help](null); 
-                return "";
+            {
+                switch (value)
+                {
+                    case -1:
+                    case 1:
+                        _messages[Message.Help1](null);
+                        return "";
+                    case 2:
+                        _messages[Message.Help2](null);
+                        return "";
+                    case 3:
+                        _messages[Message.Help3](null);
+                        return "";
+                    default:
+                        return $"Page {value} is not found.";
+                }
             };
-            _commands[Command.Quit]     = (value) => 
-            { 
-                _flag = false; 
-                return ""; 
-            };            
-            _commands[Command.Add]      = (value) => 
+
+            _commands[Command.Clear] = (value) => 
+            {
+                _tree = new RedBlackTree<int>();
+                _keys = new HashSet<int>();
+                ClearTreeSpace();
+                return "Tree is now blank."; 
+            };   
+            
+            _commands[Command.Add] = (value) => 
             {
                 if (IsTreeValid(Command.Add, value))
                 {
@@ -210,7 +247,8 @@ namespace algorythms_lab_3
                 else
                     return $"The tree already contains {value}."; 
             };
-            _commands[Command.Remove]   = (value) =>
+
+            _commands[Command.Remove] = (value) =>
             {
                 if (IsTreeValid(Command.Remove, value))
                 {
@@ -222,40 +260,81 @@ namespace algorythms_lab_3
                 else
                     return $"The tree doesn`t contain {value}.";
             };
-            _commands[Command.Find]     = (value) => 
+
+            _commands[Command.Find] = (value) => 
             {
                 if (IsTreeValid(Command.Find, value))
                     return $"({_tree.Find(value)}) found successfully.";
                 else
                     return $"The tree doesn`t contain {value}.";
             };
-            _commands[Command.Min]      = (value) => 
+
+            _commands[Command.Min] = (value) => 
             {
                 if (IsTreeValid(Command.Min, value))
                     return $"({_tree.Find(value).Min()}) found successfully.";
                 else
                     return $"The tree doesn`t contain {value}.";
             };
-            _commands[Command.Max]      = (value) => 
+
+            _commands[Command.Max] = (value) => 
             {
                 if (IsTreeValid(Command.Max, value))
                     return $"({_tree.Find(value).Max()}) found successfully.";
                 else
                     return $"The tree doesn`t contain {value}.";
-            } ;
-            _commands[Command.FindNext] = (value) => 
+            };
+
+            _commands[Command.FindNext] = (value) =>
             {
                 if (IsTreeValid(Command.FindNext, value))
-                    return $"({_tree.FindNext(value)}) found successfully.";
+                {
+                    var node = _tree.FindNext(value);
+                    return node == null ? $"{value} is the greatest." : $"({node}) found successfully.";
+                }
                 else
                     return $"The tree doesn`t contain {value}.";
             };
+
             _commands[Command.FindPrev] = (value) => 
             {
                 if (IsTreeValid(Command.FindPrev, value))
-                    return $"({_tree.FindPrevious(value)}) found successfully.";
+                {
+                    var node = _tree.FindPrevious(value);
+                    return node == null ? $"{value} is the least." : $"({node}) found successfully.";
+                }
                 else
                     return $"The tree doesn`t contain {value}.";
+            };
+
+            _commands[Command.GenerateTree] = (value) =>
+            {
+                if (IsTreeValid(Command.GenerateTree, value))
+                {
+                    AppendTree(25, 1, 999);
+                    DrawTree();
+                    return "Added 25 values.";
+                }
+                else
+                    return "The tree already contains a value.";
+            };
+
+            _commands[Command.ShowNILs] = (value) =>
+            {
+                if (_isShowingNILs)
+                    return "NIL's are already visible.";
+                _isShowingNILs = true;
+                DrawTree();
+                return "NIL's are now visible.";
+            };
+
+            _commands[Command.HideNILs] = (value) =>
+            {
+                if (!_isShowingNILs)
+                    return "NIL's are already hided.";
+                _isShowingNILs = false;
+                DrawTree();
+                return "NIL's are now hided.";
             };
         }
 
@@ -267,8 +346,12 @@ namespace algorythms_lab_3
                 => OutMessage($"Incorrect input. Use in form: [command] [value (if needed)]. Use \"Help\" to see commands list.");
             _messages[Message.IncorrectArguments] = (message) 
                 => OutMessage($"Incorrect arguments. Use in form: {message}");
-            _messages[Message.Help] = (message) 
-                => OutMessage($"Commands: Help, Quit, Add x, Remove x, Find x, Min *x, Max *x, FindNext x, FindPrev x // (x - int, * - optional)");
+            _messages[Message.Help1] = (message) 
+                => OutMessage($"Help [(optional) page], Clear, GenerateTree, ShowNILs, HideNILs, Add [int], Remove [int] ... Use \"Help 2\" ...");
+            _messages[Message.Help2] = (message)
+                => OutMessage($"Find [int], Min [(optional) int], Max [(optional) int], FindNext [int], FindPrev [int] ... Use \"Help 3\" ...");
+            _messages[Message.Help3] = (message)
+                => OutMessage($"All ints must be less than 1000.");
             _messages[Message.Start] = (message) 
                 => OutMessage($"Use \"Help\" to see commands list.");       
         }
@@ -281,7 +364,7 @@ namespace algorythms_lab_3
 
         private void OutMessage(string str) => Out("#: " + str, 2, 1);
 
-        private void GenerateTree(int count, int min, int max)
+        private void AppendTree(int count, int min, int max)
         {
             for(var i = 0; i < count; i++)
             {
@@ -298,24 +381,20 @@ namespace algorythms_lab_3
 
         private enum Command
         {
-            Help,
-            Quit,
-            Add,
-            Remove,
-            Find,
-            Min,
-            Max,
-            FindNext,
-            FindPrev
+            //tree commands
+            Add, Remove, Find, Min, Max, FindNext, FindPrev,
+            //non tree commands
+            Help, Clear, GenerateTree, ShowNILs, HideNILs
         }
 
         private enum Message
         {
-            Welcome, // to the club body
+            Welcome,
             Start,
             IncorrectInput,
             IncorrectArguments,
-            Help
+            Help1, Help2, Help3,
+            Cleared
         }
     }
 }
