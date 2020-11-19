@@ -9,7 +9,7 @@ namespace algorythms_lab_3
         {
             get
             {
-                if (_root?.Parent == null)
+                if (_root?.Parent is null)
                     return _root;
                 else
                 {
@@ -45,7 +45,7 @@ namespace algorythms_lab_3
         {
             var currentNode = Root;
             int cmp;
-            while (currentNode != null)
+            while (currentNode is not null)
                 if ((cmp = value.CompareTo(currentNode.Value)) > 0)
                     currentNode = currentNode.Right;
                 else if (cmp < 0)
@@ -66,10 +66,10 @@ namespace algorythms_lab_3
             var isNext = direction == Direction.Right;
             var node = Find(value);
             var currentNode = node;
-            if ((isNext ? node?.Right : node?.Left) != null)
+            if ((isNext ? node?.Right : node?.Left) is not null)
                 return (isNext ? node.Right.Min() : node.Left.Max());
             else
-                while (currentNode != null
+                while (currentNode is not null
                         && ((isNext ? currentNode : node).CompareTo(isNext ? node : currentNode) <= 0))
                     currentNode = currentNode.Parent;
             return currentNode;
@@ -84,13 +84,13 @@ namespace algorythms_lab_3
             Node deletingNode = Find(value);
             bool isLeft = deletingNode?.Parent?.Left == deletingNode;
             Node nextValueNode = null;
-            if (deletingNode.Left == null && deletingNode.Right == null) //haven't childs
+            if (deletingNode.Left is null && deletingNode.Right is null) //haven't childs
                 deletingNode = RemoveWithoutChilds(deletingNode, isLeft);
-            if ((deletingNode.Left != null && deletingNode.Right == null) || (deletingNode.Left == null && deletingNode.Right != null)) // have one child
+            if ((deletingNode.Left is not null && deletingNode.Right is null) || (deletingNode.Left == null && deletingNode.Right != null)) // have one child
                 deletingNode = RemoveWithOneChild(deletingNode, isLeft);
-            else if(deletingNode.Left != null && deletingNode.Right != null)//have two childs
+            else if(deletingNode.Left is not null && deletingNode.Right is not null)//have two childs
                 nextValueNode = RemoveWithTwoChilds(deletingNode, isLeft);
-            if (nextValueNode != null)
+            if (nextValueNode is not null)
             {
                 if (deletingNode != nextValueNode)
                 {
@@ -111,8 +111,8 @@ namespace algorythms_lab_3
                     //        deletingNode = nextValueNode : deletingNode.Parent.Left = nextValueNode;
 
                     nextValueNode.Parent = null;
-                    nextValueNode.Left = deletingNode.Left != null ? deletingNode.Left : null;
-                    nextValueNode.Right = deletingNode.Right != null ? deletingNode.Right : null;
+                    nextValueNode.Left = deletingNode.Left is not null ? deletingNode.Left : null;
+                    nextValueNode.Right = deletingNode.Right is not null ? deletingNode.Right : null;
                     if (deletingNode == Root)
                     {
                         //Root.Color = Color.Black;
@@ -148,17 +148,17 @@ namespace algorythms_lab_3
         {
             if (isLeft)
                 deletingNode.Parent.Left =
-                    deletingNode.Left.Value != null ? deletingNode.Left : deletingNode.Right;
+                    deletingNode.Left.Value is not null ? deletingNode.Left : deletingNode.Right;
             else
                 deletingNode.Parent.Right =
-                    deletingNode.Left.Value != null ? deletingNode.Left : deletingNode.Right;
+                    deletingNode.Left.Value is not null ? deletingNode.Left : deletingNode.Right;
             return deletingNode;
         }
 
         private Node RemoveWithTwoChilds(Node deletingNode, bool isLeft)
         {
             Node nextValueNode = FindNear(deletingNode.Value, Direction.Left);
-            if (nextValueNode?.Right != null)
+            if (nextValueNode?.Right is not null)
                 nextValueNode.Right.Parent = nextValueNode.Parent;
             if (deletingNode == Root)
             {
@@ -263,7 +263,7 @@ namespace algorythms_lab_3
 
         private void InsertCase_1(Node node)
         {
-            if (node.Parent == null)
+            if (node.Parent is null)
                 node.Color = Color.Black;
             else if (node.Parent.Color == Color.Red)
                 InsertCase_2(node);
@@ -272,7 +272,7 @@ namespace algorythms_lab_3
         private void InsertCase_2(Node node)
         {
             var uncle = node.Uncle;
-            if (uncle != null && uncle.Color == Color.Red)
+            if (uncle is not null && uncle.Color == Color.Red)
             {
                 node.Parent.Color = Color.Black;
                 uncle.Color = Color.Black;
@@ -335,7 +335,7 @@ namespace algorythms_lab_3
                 internal set
                 {
                     _left = value;
-                    if (value != null)
+                    if (value is not null)
                         value._parent = this;
                 }
             }
@@ -347,7 +347,7 @@ namespace algorythms_lab_3
                 internal set
                 {
                     _right = value;
-                    if (value != null)
+                    if (value is not null)
                         value._parent = this;
                 }
             }
@@ -359,7 +359,7 @@ namespace algorythms_lab_3
                 internal set
                 {
                     _parent = value;
-                    if (value != null)
+                    if (value is not null)
                         if (CompareTo(value) > 0)
                             value._right = this;
                         else
@@ -385,7 +385,7 @@ namespace algorythms_lab_3
             public Node Min()
             {
                 var currentNode = this;
-                while (currentNode.Left != null)
+                while (currentNode.Left is not null)
                     currentNode = currentNode.Left;
                 return currentNode;
             }
@@ -393,7 +393,7 @@ namespace algorythms_lab_3
             public Node Max()
             {
                 var currentNode = this;
-                while (currentNode.Right != null)
+                while (currentNode.Right is not null)
                     currentNode = currentNode.Right;
                 return currentNode;
             }
