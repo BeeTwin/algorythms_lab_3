@@ -21,13 +21,21 @@ namespace algorythms_lab_3
             InitializeCommands();
         }
 
+        private void _TestTree()
+        {
+            var a = new[] { 14, 20, 100, 13, 2, 3, 5, 6, 22, 30, 56, 101, 71, 4, 8, 72 };
+            _tree.Insert(a);
+            _keys = a.ToHashSet();
+        }
+
         public void StartProcessing()
         {
             _rbtViewer.PrepareOutput();
             _rbtViewer.Out(Message.Welcome, null);
             if (_rbtViewer.GetInput()[0] == "y")
             {
-                AppendTree(25, 1, 999);
+                //AppendTree(25, 1, 999);
+                _TestTree();
                 _rbtViewer.ShowTree(_tree, _isShowingNILs);
             }
             _rbtViewer.Out(Message.Start, null);

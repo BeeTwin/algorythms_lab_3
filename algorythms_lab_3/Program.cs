@@ -1,6 +1,6 @@
 ﻿using algorythms_lab_3;
 
-//_Test();
+_Test();
 var consoleProcessor = new RBTProcessor(new ConsoleRBTViewer());
 consoleProcessor.StartProcessing();
 

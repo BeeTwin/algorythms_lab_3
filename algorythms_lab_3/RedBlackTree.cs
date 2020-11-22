@@ -97,112 +97,57 @@ namespace algorythms_lab_3
 
         public void Remove(T value)
         {
-            Node deletingNode = Find(value);
-            bool isLeft = deletingNode?.Parent?.Left == deletingNode;
+            var removingNode = Find(value);
             Node nextValueNode = null;
-            if (deletingNode.Left is null && deletingNode.Right is null) //haven't childs
-                deletingNode = RemoveWithoutChilds(deletingNode, isLeft);
-            if ((deletingNode.Left is not null && deletingNode.Right is null) || (deletingNode.Left == null && deletingNode.Right != null)) // have one child
-                deletingNode = RemoveWithOneChild(deletingNode, isLeft);
-            else if(deletingNode.Left is not null && deletingNode.Right is not null)//have two childs
-                nextValueNode = RemoveWithTwoChilds(deletingNode, isLeft);
-            if (nextValueNode is not null)
+            if (removingNode.Left == null || removingNode.Right == null)
+                RemoveWithOneORZeroChild(removingNode);
+            else if (removingNode.Left != null && removingNode.Right != null)
             {
-                if (deletingNode != nextValueNode)
-                {
-                    _ = nextValueNode.Parent.Left == nextValueNode ?
-                        nextValueNode.Parent.Left = null : nextValueNode.Parent.Right = null;
-                    if (deletingNode != Root)
-                    {
-                        if (isLeft)
-                            deletingNode.Parent.Left = nextValueNode;
-                        else
-                            deletingNode.Parent.Right = nextValueNode;
-                        nextValueNode.Parent = deletingNode.Parent;
-                    }
-
-                    //deletingNode.Value = nextValueNode.Value;
-                    //if (deletingNode != Root)
-                    //    _ = deletingNode?.Parent?.Left != null ?
-                    //        deletingNode = nextValueNode : deletingNode.Parent.Left = nextValueNode;
-
-                    nextValueNode.Parent = null;
-                    nextValueNode.Left = deletingNode.Left is not null ? deletingNode.Left : null;
-                    nextValueNode.Right = deletingNode.Right is not null ? deletingNode.Right : null;
-                    if (deletingNode == Root)
-                    {
-                        //Root.Color = Color.Black;
-                        //_ = nextValueNode?.Parent?.Left == nextValueNode ?
-                        // nextValueNode.Parent.Left = null : nextValueNode.Parent.Right = null;
-                        Root = nextValueNode;
-                        Root.Color = Color.Black;
-                    }
-                    else
-                        deletingNode.Color = nextValueNode.Color;
-
-                }
-                if (nextValueNode.Color == Color.Black)
-                    FixRemoving(nextValueNode);
+                nextValueNode = FindNear(value, Direction.Left);
+                var nextValueNodeColor = nextValueNode.Color;
+                var nextValueNodeParent = nextValueNode.Parent;
+                var nextValueNodeIsLeft = IsLeft(nextValueNode);
+                var nextValueNodeLeft = nextValueNode.Left;
+                var nextValueNodeRight = nextValueNode.Right;
+                nextValueNode.Left = removingNode.Left;
+                nextValueNode.Right = removingNode.Right;
+                nextValueNode.Parent = removingNode.Parent;
+                _ = IsLeft(removingNode) ? removingNode.Parent.Left = nextValueNode
+                    : removingNode.Parent.Right = nextValueNode;
+                removingNode.Left = nextValueNodeLeft;
+                removingNode.Right = nextValueNodeRight;
+                removingNode.Parent = nextValueNodeIsLeft ? nextValueNodeParent : nextValueNodeParent;
+                nextValueNode.Color = removingNode.Color;
+                removingNode.Color = nextValueNodeColor;
+                RemoveWithOneORZeroChild(removingNode);
             }
+            if (nextValueNode != null) FixRemoving(nextValueNode);
         }
 
-        private Node RemoveWithoutChilds(Node deletingNode, bool isLeft)
+        private void RemoveWithOneORZeroChild(Node removingNode)
         {
-            if (deletingNode == Root)
-                Root = null;
-            else
+            if (removingNode.Left == null && removingNode.Right == null)
             {
-                if (isLeft)
-                    deletingNode.Parent.Left = null;
-                else
-                    deletingNode.Parent.Right = null;
+                _ = IsLeft(removingNode) ? removingNode.Parent.Left = null
+                    : removingNode.Parent.Right = null;
+                removingNode.Parent = null;
             }
-            return deletingNode;
+            else if (((removingNode.Left == null && removingNode.Right != null)
+                || (removingNode.Left != null && removingNode.Right == null))
+                && IsBlack(removingNode))
+                 {
+                    _ = IsLeft(removingNode) ?
+                        removingNode.Parent.Left = removingNode.Left != null ? removingNode.Left : removingNode.Right
+                        : removingNode.Parent.Right = removingNode.Left != null ? removingNode.Left : removingNode.Right;
+                    removingNode.Parent = null;
+                    _ = removingNode.Left != null ? removingNode.Left = null : removingNode.Right = null;
+                 }
         }
 
-        private Node RemoveWithOneChild(Node deletingNode, bool isLeft)
-        {
-            if (isLeft)
-                deletingNode.Parent.Left =
-                    deletingNode.Left.Value is not null ? deletingNode.Left : deletingNode.Right;
-            else
-                deletingNode.Parent.Right =
-                    deletingNode.Left.Value is not null ? deletingNode.Left : deletingNode.Right;
-            return deletingNode;
-        }
+        public bool IsBlack(Node node) => node == null || node.Color == Color.Black;
 
-        private Node RemoveWithTwoChilds(Node deletingNode, bool isLeft)
-        {
-            Node nextValueNode = FindNear(deletingNode.Value, Direction.Left);
-            if (nextValueNode?.Right is not null)
-                nextValueNode.Right.Parent = nextValueNode.Parent;
-            if (deletingNode == Root)
-            {
-               // _ = nextValueNode?.Parent?.Left == nextValueNode ?
-                // nextValueNode.Parent.Left = null : nextValueNode.Parent.Right = null;
-                Root = nextValueNode;
-            }
-            else
-            {
-                if (isLeft)
-                {
-                   // _ = nextValueNode.Parent.Left == nextValueNode ?
-                      //  nextValueNode.Parent.Left = null : nextValueNode.Parent.Right = null;
-                    //deletingNode.Parent.Left = nextValueNode; // первого? ?.Right
-                    //nextValueNode.Left = deletingNode.Left != null ? deletingNode.Left : null;
-                    //nextValueNode.Right = deletingNode.Right != null ? deletingNode.Right : null;
-                }
-                else
-                {
-                   // _ = nextValueNode.Parent.Left == nextValueNode ?
-                    //    nextValueNode.Parent.Left = null : nextValueNode.Parent.Right = null;
-                    //deletingNode.Parent.Right = nextValueNode; // первого?
-                    //nextValueNode.Left = deletingNode.Left != null ? deletingNode.Left : null;
-                    //nextValueNode.Right = deletingNode.Right != null ? deletingNode.Right : null;
-                }
-            }
-            return nextValueNode;
-        }
+        public bool IsLeft(Node node) => node.CompareTo(node.Parent) < 0;
+
 
         private void FixRemoving(Node currentNode)
         {
@@ -210,43 +155,53 @@ namespace algorythms_lab_3
                 currentNode.Color = Color.Black;
             else
             {
-                bool isLeft = currentNode.Parent.Left == currentNode;
-                while (currentNode.Color == Color.Black && currentNode != Root)
-                    if (isLeft)
-                        currentNode = FixRemovingIfLeftChild(currentNode);
-                    else
-                        currentNode = FixRemovingIfRightChild(currentNode);
-                currentNode.Color = Color.Black;
-                Root.Color = Color.Black;
-            }
-        }
-
-        private Node FixRemovingIfLeftChild(Node currentNode)
-        {
-            if (currentNode.Sibling.Color == Color.Red)
-            {
-                currentNode.Sibling.Color = Color.Black;
-                currentNode.Parent.Color = Color.Red;
-                Rotate(currentNode.Parent, Direction.Left);
-            }
-            if (currentNode.Sibling.Left.Color == Color.Black
-                && currentNode.Sibling.Right.Color == Color.Black)
-                currentNode.Sibling.Color = Color.Red;
-            else
-            {
-                if (currentNode.Sibling.Right.Color == Color.Black)
+                if (!IsBlack(currentNode.Parent) && IsBlack(currentNode)
+                && IsBlack(currentNode.Left) && IsBlack(currentNode.Right))
                 {
-                    currentNode.Sibling.Left.Color = Color.Black;
-                    currentNode.Sibling.Color = Color.Red;
-                    Rotate(currentNode.Sibling, Direction.Right);
+                    currentNode.Parent.Color = Color.Black;
+                    currentNode.Color = Color.Red;
                 }
-                currentNode.Sibling.Color = currentNode.Parent.Color;
-                currentNode.Parent.Color = Color.Black;
-                currentNode.Sibling.Right.Color = Color.Black;
-                Rotate(currentNode.Parent, Direction.Left);
-                currentNode.Color = Root.Color; //?
+                else
+                if (!IsBlack(currentNode.Parent) && IsBlack(currentNode)
+                 && !IsBlack(currentNode.Left))
+                {
+                    currentNode.Parent.Color = Color.Black;
+                    currentNode.Color = Color.Red;
+                    Rotate(currentNode.Parent, Direction.Right);
+                }
+                else
+                if (IsBlack(currentNode.Parent) && !IsBlack(currentNode)
+                 && IsBlack(currentNode.Right.Left) && IsBlack(currentNode.Right.Right))
+                {
+                    currentNode.Color = Color.Black;
+                    currentNode.Right.Color = Color.Red;
+                    Rotate(currentNode.Parent, Direction.Right);
+                }
+                else
+                if (IsBlack(currentNode.Parent) && !IsBlack(currentNode)
+                 && !IsBlack(currentNode.Right.Left))
+                {
+                    currentNode.Right.Left.Color = Color.Black;
+                    Rotate(currentNode, Direction.Left);
+                    Rotate(currentNode.Parent.Parent, Direction.Right);
+                }
+                else
+                if (IsBlack(currentNode.Parent) && IsBlack(currentNode)
+                 && !IsBlack(currentNode.Right))
+                {
+                    currentNode.Right.Color = Color.Black;
+                    Rotate(currentNode, Direction.Left);
+                    Rotate(currentNode.Parent.Parent, Direction.Right);
+                }
+                            else
+                if (IsBlack(currentNode.Parent) && IsBlack(currentNode)
+                 && IsBlack(currentNode.Right) && IsBlack(currentNode.Left))
+                {
+                    currentNode.Color = Color.Red;
+                    FixRemoving(currentNode.Parent.Parent);
+                }
+
             }
-            return currentNode;
         }
 
         private Node FixRemovingIfRightChild(Node currentNode)
@@ -257,8 +212,8 @@ namespace algorythms_lab_3
                 currentNode.Parent.Color = Color.Red;
                 Rotate(currentNode.Parent, Direction.Right);
             }
-            if (currentNode.Sibling.Left.Color == Color.Black
-                && currentNode.Sibling.Right.Color == Color.Black)
+            if (IsBlack(currentNode.Sibling.Left)
+                && IsBlack(currentNode.Sibling.Right))
                 currentNode.Sibling.Color = Color.Red;
             else
             {
@@ -333,6 +288,8 @@ namespace algorythms_lab_3
         {
             var isRight = direction == Direction.Right;
             var pivot = isRight ? node.Left : node.Right;
+            if(pivot == null)
+                pivot = isRight ? node.Parent.Left : node.Parent.Right;
             pivot.Parent = node.Parent;
             _ = isRight ? node.Left = pivot.Right : node.Right = pivot.Left;
             _ = isRight ? pivot.Right = node : pivot.Left = node;
@@ -393,7 +350,7 @@ namespace algorythms_lab_3
                 => Parent?.Parent;
 
             public Node Sibling
-                => this == Parent?.Left ? Parent?.Right : Parent?.Left;
+                => CompareTo(Parent) < 0 ? Parent?.Right : Parent?.Left;
 
             public Node Uncle
                 => Parent?.Sibling;
