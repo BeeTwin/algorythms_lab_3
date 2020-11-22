@@ -1,8 +1,8 @@
 ﻿using algorythms_lab_3;
 
 //_Test();
-var consoleRBT = new ConsoleRBT();
-consoleRBT.StartConsoleProccessing();
+var consoleProcessor = new RBTProcessor(new ConsoleRBTViewer());
+consoleProcessor.StartProcessing();
 
 static void _Test()
 {
