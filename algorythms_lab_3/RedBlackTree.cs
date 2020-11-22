@@ -9,7 +9,7 @@ namespace algorythms_lab_3
         {
             get
             {
-                if (_root?.Parent == null)
+                if (_root?.Parent is null)
                     return _root;
                 else
                 {
@@ -45,7 +45,7 @@ namespace algorythms_lab_3
         {
             var currentNode = Root;
             int cmp;
-            while (currentNode != null)
+            while (currentNode is not null)
                 if ((cmp = value.CompareTo(currentNode.Value)) > 0)
                     currentNode = currentNode.Right;
                 else if (cmp < 0)
@@ -66,10 +66,10 @@ namespace algorythms_lab_3
             var isNext = direction == Direction.Right;
             var node = Find(value);
             var currentNode = node;
-            if ((isNext ? node?.Right : node?.Left) != null)
+            if ((isNext ? node?.Right : node?.Left) is not null)
                 return (isNext ? node.Right.Min() : node.Left.Max());
             else
-                while (currentNode != null
+                while (currentNode is not null
                         && ((isNext ? currentNode : node).CompareTo(isNext ? node : currentNode) <= 0))
                     currentNode = currentNode.Parent;
             return currentNode;
@@ -202,7 +202,7 @@ namespace algorythms_lab_3
 
         private void InsertCase_1(Node node)
         {
-            if (node.Parent == null)
+            if (node.Parent is null)
                 node.Color = Color.Black;
             else if (node.Parent.Color == Color.Red)
                 InsertCase_2(node);
@@ -211,7 +211,7 @@ namespace algorythms_lab_3
         private void InsertCase_2(Node node)
         {
             var uncle = node.Uncle;
-            if (uncle != null && uncle.Color == Color.Red)
+            if (uncle is not null && uncle.Color == Color.Red)
             {
                 node.Parent.Color = Color.Black;
                 uncle.Color = Color.Black;
@@ -276,7 +276,7 @@ namespace algorythms_lab_3
                 internal set
                 {
                     _left = value;
-                    if (value != null)
+                    if (value is not null)
                         value._parent = this;
                 }
             }
@@ -288,7 +288,7 @@ namespace algorythms_lab_3
                 internal set
                 {
                     _right = value;
-                    if (value != null)
+                    if (value is not null)
                         value._parent = this;
                 }
             }
@@ -300,7 +300,7 @@ namespace algorythms_lab_3
                 internal set
                 {
                     _parent = value;
-                    if (value != null)
+                    if (value is not null)
                         if (CompareTo(value) > 0)
                             value._right = this;
                         else
@@ -326,7 +326,7 @@ namespace algorythms_lab_3
             public Node Min()
             {
                 var currentNode = this;
-                while (currentNode.Left != null)
+                while (currentNode.Left is not null)
                     currentNode = currentNode.Left;
                 return currentNode;
             }
@@ -334,7 +334,7 @@ namespace algorythms_lab_3
             public Node Max()
             {
                 var currentNode = this;
-                while (currentNode.Right != null)
+                while (currentNode.Right is not null)
                     currentNode = currentNode.Right;
                 return currentNode;
             }

@@ -1,42 +1,32 @@
-﻿using System;
+﻿using algorythms_lab_3;
 
-namespace algorythms_lab_3
+//_Test();
+var consoleRBT = new ConsoleRBT();
+consoleRBT.StartConsoleProccessing();
+
+static void _Test()
 {
-    class Program
-    {
-        static void Main(string[] args)
-        {
-           // _Test();
- 
-            var consoleRBT = new ConsoleRBT();
-            consoleRBT.StartConsoleProccessing();
-        }
-
-        private static void _Test()
-        {
-            var a = new RedBlackTree<int>();
+    var a = new RedBlackTree<int>();
             
-            a.Insert(14);
-            a.Insert(20);
-            a.Insert(100);
-            a.Insert(13);
-            a.Insert(2);
-            a.Insert(3);
-            a.Insert(5);
-            a.Insert(6);
-            a.Insert(22);
-            a.Insert(30);
-            a.Insert(56);
-            a.Insert(101);
-            a.Insert(71);
-            a.Insert(4);
-            a.Insert(8);
-            a.Insert(72);
-            a.Remove(100);
-            a.Remove(13);
-            a.Remove(2);
-            a.Remove(3);
-            a.Remove(30);
-        }
-    }
+    a.Insert(14);
+    a.Insert(20);
+    a.Insert(100);
+    a.Insert(13);
+    a.Insert(2);
+    a.Insert(3);
+    a.Insert(5);
+    a.Insert(6);
+    a.Insert(22);
+    a.Insert(30);
+    a.Insert(56);
+    a.Insert(101);
+    a.Insert(71);
+    a.Insert(4);
+    a.Insert(8);
+    a.Insert(72);
+    a.Remove(100);
+    a.Remove(13);
+    a.Remove(2);
+    a.Remove(30);
+
 }

@@ -98,7 +98,7 @@ namespace algorythms_lab_3
                 node.Value.ToString() + new string(' ', 3 - node.Value.ToString().Length), x, y);
             var loc = y;
 
-            if (node.Right != null)
+            if (node.Right is not null)
             {
                 Out("══", x + 3, y);
                 y = DrawTree(node.Right, x + 5, y);
@@ -109,7 +109,7 @@ namespace algorythms_lab_3
                 ColorOut(ConsoleColor.Black, ConsoleColor.DarkGray, "NIL", x + 5, y);
             }
 
-            if (node.Left != null)
+            if (node.Left is not null)
             {
                 while (loc <= y)
                 {
@@ -186,17 +186,17 @@ namespace algorythms_lab_3
                 case Command.GenerateTree:
                 case Command.ShowNILs:
                 case Command.HideNILs:
-                    return args == null;
+                    return args is null;
                 case Command.Help:
                 case Command.Min:
                 case Command.Max:
-                    return args == null || int.TryParse(args, out var _);
+                    return args is null || int.TryParse(args, out var _);
                 case Command.Add: 
                 case Command.Remove: 
                 case Command.Find: 
                 case Command.FindNext: 
                 case Command.FindPrev:
-                    return int.TryParse(args, out var intArgs);
+                    return int.TryParse(args, out var _);
                 default:
                     return false;
             }
@@ -215,7 +215,7 @@ namespace algorythms_lab_3
 
         private void InitializeCommands()
         {
-            _commands[Command.Help]     = (value) => 
+            _commands[Command.Help] = (value) => 
             {
                 switch (value)
                 {
@@ -297,7 +297,7 @@ namespace algorythms_lab_3
                 if (IsTreeValid(Command.FindNext, value))
                 {
                     var node = _tree.FindNext(value);
-                    return node == null ? $"{value} is the greatest." : $"({node}) found successfully.";
+                    return node is null ? $"{value} is the greatest." : $"({node}) found successfully.";
                 }
                 else
                     return $"The tree doesn`t contain {value}.";
@@ -308,7 +308,7 @@ namespace algorythms_lab_3
                 if (IsTreeValid(Command.FindPrev, value))
                 {
                     var node = _tree.FindPrevious(value);
-                    return node == null ? $"{value} is the least." : $"({node}) found successfully.";
+                    return node is null ? $"{value} is the least." : $"({node}) found successfully.";
                 }
                 else
                     return $"The tree doesn`t contain {value}.";
