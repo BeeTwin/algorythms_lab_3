@@ -76,7 +76,10 @@ namespace algorythms_lab_3
 
         private void _TestTree()
         {
+            _keys = new HashSet<int>() { 14, 20, 2, 3, 5, 6, 22, 30, 56, 101, 71, 4, 8, 72 };
             _tree.Insert(14, 20, 100, 13, 2, 3, 5, 6, 22, 30, 56, 101, 71, 4, 8, 72);
+            _tree.Remove(100);
+            _tree.Remove(13);
         }
 
         private void DrawTree()
