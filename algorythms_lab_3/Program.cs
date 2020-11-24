@@ -25,8 +25,8 @@ static void _Test()
     a.Insert(8);
     a.Insert(72);
     a.Remove(100);
-    a.Remove(13);
     a.Remove(2);
+    a.Remove(13);
     a.Remove(30);
 
 }
