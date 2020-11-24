@@ -1,6 +1,6 @@
 ﻿using algorythms_lab_3;
 
-_Test();
+//_Test();
 var consoleProcessor = new RBTProcessor(new ConsoleRBTViewer());
 consoleProcessor.StartProcessing();
 
@@ -25,8 +25,8 @@ static void _Test()
     a.Insert(8);
     a.Insert(72);
     a.Remove(100);
-    a.Remove(13);
     a.Remove(2);
+    a.Remove(13);
     a.Remove(30);
 
 }
