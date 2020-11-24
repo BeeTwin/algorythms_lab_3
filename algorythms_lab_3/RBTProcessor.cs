@@ -14,11 +14,14 @@ namespace algorythms_lab_3
         private readonly Dictionary<Command, Action<int>> _commands = new Dictionary<Command, Action<int>>();
         private bool _flag = true;
         private bool _isShowingNILs = false;
+        private Action<int, int, int> _fillTree;
 
         public RBTProcessor(IRBTViewer rbtViewer)
         {
             _rbtViewer = rbtViewer;
             InitializeCommands();
+            //_fillTree = (count, min, max) => _TestTree();
+            _fillTree = (count, min, max) => AppendTree(count, min, max);
         }
 
         private void _TestTree()
@@ -34,8 +37,7 @@ namespace algorythms_lab_3
             _rbtViewer.Out(Message.Welcome, null);
             if (_rbtViewer.GetInput()[0] == "y")
             {
-                //AppendTree(25, 1, 999);
-                _TestTree();
+                _fillTree(25, 0, 999);
                 _rbtViewer.ShowTree(_tree, _isShowingNILs);
             }
             _rbtViewer.Out(Message.Start, null);
@@ -122,7 +124,7 @@ namespace algorythms_lab_3
                 if (IsTreeValid(Command.Remove, value))
                 {
                     _keys.Remove(value);
-                    _tree.Remove_v_2(value);
+                    _tree.Remove(value);
                     _rbtViewer.ShowTree(_tree, _isShowingNILs);
                     _rbtViewer.Out(Message.RemoveSuccess, value);
                 }
@@ -186,7 +188,7 @@ namespace algorythms_lab_3
             {
                 if (IsTreeValid(Command.GenerateTree, value))
                 {
-                    AppendTree(25, 1, 999);
+                    _fillTree(25, 1, 999);
                     _rbtViewer.ShowTree(_tree, _isShowingNILs);
                     _rbtViewer.Out(Message.Added25, null);
                 }
@@ -254,7 +256,7 @@ namespace algorythms_lab_3
             }
         }
 
-        private bool IsInputRight(Command command, string args)
+        private static bool IsInputRight(Command command, string args)
         {
             switch (command)
             {
@@ -280,10 +282,10 @@ namespace algorythms_lab_3
             }
         }
 
-        private bool IsSingular(Command command) 
+        private static bool IsSingular(Command command) 
             => command == Command.Min || command == Command.Max;
 
-        private bool IsConsole(Command command) => 
+        private static bool IsConsole(Command command) => 
             command switch
             {
                 Command.Help => true, 
