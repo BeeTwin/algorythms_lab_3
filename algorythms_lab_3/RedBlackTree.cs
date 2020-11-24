@@ -205,7 +205,7 @@ namespace algorythms_lab_3
 
         private void InsertCase_1(Node node)
         {
-            if (node.Parent is null)
+            if (node == Root)
                 node.Color = Color.Black;
             else if (node.Parent.Color == Color.Red)
                 InsertCase_2(node);
