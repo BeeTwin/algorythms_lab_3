@@ -17,10 +17,10 @@ namespace algorythms_lab_3
                     return Root;
                 }
             }
-            private set 
+            private set
             {
-                _root = value; 
-            }             
+                _root = value;
+            }
         }
 
         public void Insert(params T[] values)
@@ -79,22 +79,122 @@ namespace algorythms_lab_3
 
         public Node Max() => Root.Max();
 
-        public void Remove_v_2(T value)
+        public void Remove_v_2(T value) => Remove(Find(value));
+
+        private void Remove(Node node)
         {
-            var deletingNode = Find(value);
-            if (IsBlack(deletingNode))
-                RemoveBlack(deletingNode);
+            if (IsBlack(node))
+                RemoveBlack(node);
             else
-                RemoveRed(deletingNode);
+                RemoveRed(node);
         }
 
-        private void RemoveBlack(Node deletingNode)
+        private void RemoveRed(Node node)
         {
-
+            if (node.Left is not null && node.Right is not null)
+            {
+                var swappingNode = node.Left.Max();
+                node.SwapValues(swappingNode);
+                Remove(swappingNode);
+            }
+            else
+                _ = IsLeft(node) ? node.Parent.Left = null : node.Parent.Right = null;
         }
 
-        private 
+        private void RemoveBlack(Node node)
+        {
+            if (node.Left is not null && node.Right is not null)
+            {
+                var swappingNode = node.Left.Max();
+                node.SwapValues(swappingNode);
+                Remove(swappingNode);
+            }
+            else if (node.Left is not null && node.Right is null)
+            {
+                var swappingNode = node.Left;
+                node.SwapValues(swappingNode);
+                Remove(swappingNode);
+            }
+            else if (node.Left is null && node.Right is not null)
+            {
+                var swappingNode = node.Right;
+                node.SwapValues(swappingNode);
+                Remove(swappingNode);
+            }
+            else
+            {
+                var isLeft = IsLeft(node);
+                FixRemovingBlackWithoutChildren(node, isLeft);
+                _ = isLeft ? node.Parent.Left = null : node.Parent.Right = null;
+            }
+        }
 
+        private void FixRemovingBlackWithoutChildren(Node node, bool isLeft)
+        {
+            var sibling =  node.Sibling;
+            node = node.Parent;
+            isLeft = !isLeft;
+            if (!IsBlack(node)
+                && IsBlack(sibling)
+                && IsBlack(sibling.Left)
+                && IsBlack(sibling.Right))
+            {
+                node.Color = Color.Black;
+                sibling.Color = Color.Red;
+            }
+            else if (!IsBlack(node)
+                && IsBlack(sibling)
+                && isLeft ? !IsBlack(sibling.Left) : !IsBlack(sibling.Right))
+            {
+                node.Color = Color.Black;
+                (isLeft ? sibling.Left : sibling.Right).Color = Color.Black;
+                Rotate(node, isLeft ? Direction.Right : Direction.Left);
+            }
+            else if (IsBlack(node) 
+                && IsBlack(sibling) 
+                && isLeft ? sibling.Right is not null : sibling.Left is not null
+                && IsBlack(isLeft ? sibling.Right?.Left : sibling.Left?.Left)
+                && IsBlack(isLeft ? sibling?.Right?.Right :sibling?.Left?.Right))
+            {
+                (isLeft ? sibling.Right : sibling.Left).Color = Color.Red;
+                Rotate(node, isLeft ? Direction.Right : Direction.Left);
+            }
+            else if (IsBlack(node)
+                && IsBlack(sibling)
+                & isLeft ? sibling.Right is not null : sibling.Left is not null
+                && isLeft ? IsBlack(sibling.Right) : IsBlack(sibling.Left)
+                && isLeft ? !IsBlack(sibling.Right?.Left) : !IsBlack(sibling.Left?.Right))
+            {
+                (isLeft ? sibling.Right.Left : sibling.Left.Right).Color = Color.Black;
+                Rotate(sibling, isLeft ? Direction.Left : Direction.Right);
+                Rotate(node, isLeft ? Direction.Right : Direction.Left);
+            }
+            else if (IsBlack(node) 
+                && IsBlack(sibling)
+                && isLeft ? !IsBlack(sibling.Right) : !IsBlack(sibling.Left))
+            {
+                (isLeft ? sibling.Right : sibling.Left).Color = Color.Black;
+                Rotate(sibling, isLeft ? Direction.Left : Direction.Right);
+                Rotate(node, isLeft ? Direction.Right : Direction.Left);
+            }
+            else if (IsBlack(node)
+                && IsBlack(sibling)
+                && !IsBlack(isLeft ? sibling.Left : sibling.Right))
+            {
+                (isLeft ? sibling.Left : sibling.Right).Color = Color.Black;
+                Rotate(node, isLeft ? Direction.Right : Direction.Left);
+            }
+            else if (IsBlack(node)
+                && IsBlack(sibling)
+                && IsBlack(sibling.Left)
+                && IsBlack(sibling.Right))
+            {
+                sibling.Color = Color.Red;
+                FixRemovingBlackWithoutChildren(node, IsLeft(node));
+            }
+        }
+
+        //---------------------------------
         public void Remove(T value)
         {
             var removingNode = Find(value);
@@ -146,7 +246,7 @@ namespace algorythms_lab_3
 
         public bool IsBlack(Node node) => node == null || node.Color == Color.Black;
 
-        public bool IsLeft(Node node) => node.CompareTo(node.Parent) < 0;
+        public bool IsLeft(Node node) => node == node.Parent.Left;
 
 
         private void FixRemoving(Node currentNode)
@@ -247,9 +347,9 @@ namespace algorythms_lab_3
             {
                 node.Parent.Color = Color.Black;
                 uncle.Color = Color.Black;
-                var grandparent = node.Grandparent;
-                grandparent.Color = Color.Red;
-                InsertCase_1(grandparent);
+                var grandParent = node.GrandParent;
+                grandParent.Color = Color.Red;
+                InsertCase_1(grandParent);
             }
             else
                 InsertCase_3(node);
@@ -257,13 +357,13 @@ namespace algorythms_lab_3
 
         private void InsertCase_3(Node node)
         {
-            var grandparent = node.Grandparent;
-            if (node == node.Parent.Right && node.Parent == grandparent.Left)
+            var grandParent = node.GrandParent;
+            if (node == node.Parent.Right && node.Parent == grandParent.Left)
             {
                 Rotate(node.Parent, Direction.Left);
                 node = node.Left;
             }
-            else if (node == node.Parent.Left && node.Parent == grandparent.Right)
+            else if (node == node.Parent.Left && node.Parent == grandParent.Right)
             {
                 Rotate(node.Parent, Direction.Right);
                 node = node.Right;
@@ -273,13 +373,13 @@ namespace algorythms_lab_3
 
         private void InsertCase_4(Node node)
         {
-            var grandparent = node.Grandparent;
+            var grandParent = node.GrandParent;
             node.Parent.Color = Color.Black;
-            grandparent.Color = Color.Red;
+            grandParent.Color = Color.Red;
             Rotate(
-                grandparent, 
+                grandParent, 
                 node == node.Parent.Left 
-                && node.Parent == grandparent.Left 
+                && node.Parent == grandParent.Left 
                     ? Direction.Right 
                     : Direction.Left);
         }
@@ -301,42 +401,42 @@ namespace algorythms_lab_3
 
             public Color Color { get; internal set; } //help
 
-            private Node _left;
+            private Node _Left;
             public Node Left
             {
-                get => _left;
+                get => _Left;
                 internal set
                 {
-                    _left = value;
+                    _Left = value;
                     if (value is not null)
-                        value._parent = this;
+                        value._Parent = this;
                 }
             }
 
-            private Node _right;
+            private Node _Right;
             public Node Right
             {
-                get => _right;
+                get => _Right;
                 internal set
                 {
-                    _right = value;
+                    _Right = value;
                     if (value is not null)
-                        value._parent = this;
+                        value._Parent = this;
                 }
             }
 
-            private Node _parent;
+            private Node _Parent;
             public Node Parent
             {
-                get => _parent;
+                get => _Parent;
                 internal set
                 {
-                    _parent = value;
+                    _Parent = value;
                     if (value is not null)
                         if (CompareTo(value) > 0)
-                            value._right = this;
+                            value._Right = this;
                         else
-                            value._left = this;
+                            value._Left = this;
                 }
             }
 
@@ -346,12 +446,12 @@ namespace algorythms_lab_3
                 Color = Color.Red;
             }
 
-            public Node Grandparent
+            public Node GrandParent
                 => Parent?.Parent;
 
             public Node Sibling
-                => CompareTo(Parent) < 0 ? Parent?.Right : Parent?.Left;
-
+                //=> CompareTo(Parent) < 0 ? Parent?.Right : Parent?.Left;
+                => this == Parent?.Left ? Parent?.Right : Parent?.Left;
             public Node Uncle
                 => Parent?.Sibling;
 
@@ -369,6 +469,13 @@ namespace algorythms_lab_3
                 while (currentNode.Right is not null)
                     currentNode = currentNode.Right;
                 return currentNode;
+            }
+
+            public void SwapValues(Node node)
+            {
+                var value = node.Value;
+                node.Value = Value;
+                Value = value;
             }
 
             public int CompareTo(Node node)

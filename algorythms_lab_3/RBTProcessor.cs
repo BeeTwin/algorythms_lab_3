@@ -122,7 +122,7 @@ namespace algorythms_lab_3
                 if (IsTreeValid(Command.Remove, value))
                 {
                     _keys.Remove(value);
-                    _tree.Remove(value);
+                    _tree.Remove_v_2(value);
                     _rbtViewer.ShowTree(_tree, _isShowingNILs);
                     _rbtViewer.Out(Message.RemoveSuccess, value);
                 }
