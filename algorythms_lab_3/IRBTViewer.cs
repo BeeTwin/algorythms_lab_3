@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace algorythms_lab_3
+﻿namespace algorythms_lab_3
 {
     public interface IRBTViewer 
     {

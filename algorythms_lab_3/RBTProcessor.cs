@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace algorythms_lab_3
 {
@@ -14,21 +12,13 @@ namespace algorythms_lab_3
         private readonly Dictionary<Command, Action<int>> _commands = new Dictionary<Command, Action<int>>();
         private bool _flag = true;
         private bool _isShowingNILs = false;
-        private Action<int, int, int> _fillTree;
+        private readonly Action<int, int, int> _fillTree;
 
         public RBTProcessor(IRBTViewer rbtViewer)
         {
             _rbtViewer = rbtViewer;
             InitializeCommands();
-            //_fillTree = (count, min, max) => _TestTree();
             _fillTree = (count, min, max) => AppendTree(count, min, max);
-        }
-
-        private void _TestTree()
-        {
-            var a = new[] { 14, 20, 100, 13, 2, 3, 5, 6, 22, 30, 56, 101, 71, 4, 8, 72 };
-            _tree.Insert(a);
-            _keys = a.ToHashSet();
         }
 
         public void StartProcessing()
