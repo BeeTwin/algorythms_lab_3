@@ -108,6 +108,8 @@ namespace algorythms_lab_3
 
         public int DrawTree(RedBlackTree<int>.Node node, int x, int y, bool isShowingNILs)
         {
+            if (node is null)
+                return -1;
             ColorOut(
                 node.Color == RedBlackTree<int>.Color.Black
                     ? ConsoleColor.White : ConsoleColor.Black,
