@@ -19,15 +19,6 @@ namespace algorythms_lab_3
         public void ClearTree();
     }
 
-
-    public enum Command
-    {
-        //tree commands
-        Add, Remove, Find, Min, Max, FindNext, FindPrev,
-        //non tree commands
-        Help, Clear, GenerateTree, ShowNILs, HideNILs
-    }
-
     public enum Message
     {
         Empty, Welcome, Start, Cleared,

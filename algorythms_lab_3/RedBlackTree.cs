@@ -79,6 +79,22 @@ namespace algorythms_lab_3
 
         public Node Max() => Root.Max();
 
+        public void Remove_v_2(T value)
+        {
+            var deletingNode = Find(value);
+            if (IsBlack(deletingNode))
+                RemoveBlack(deletingNode);
+            else
+                RemoveRed(deletingNode);
+        }
+
+        private void RemoveBlack(Node deletingNode)
+        {
+
+        }
+
+        private 
+
         public void Remove(T value)
         {
             var removingNode = Find(value);

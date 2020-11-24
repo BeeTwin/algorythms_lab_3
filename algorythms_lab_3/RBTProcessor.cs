@@ -293,5 +293,13 @@ namespace algorythms_lab_3
                 Command.ShowNILs => true,
                 _ => false
             };
+
+        private enum Command
+        {
+            //tree commands
+            Add, Remove, Find, Min, Max, FindNext, FindPrev,
+            //non tree commands
+            Help, Clear, GenerateTree, ShowNILs, HideNILs
+        }
     }
 }
