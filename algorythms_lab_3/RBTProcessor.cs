@@ -37,7 +37,7 @@ namespace algorythms_lab_3
             _rbtViewer.Out(Message.Welcome, null);
             if (_rbtViewer.GetInput()[0] == "y")
             {
-                _fillTree(25, 0, 999);
+                _fillTree(25, 1, 999);
                 _rbtViewer.ShowTree(_tree, _isShowingNILs);
             }
             _rbtViewer.Out(Message.Start, null);
@@ -75,7 +75,7 @@ namespace algorythms_lab_3
                         else if (IsSingular(command))
                             output += "[(optional)int]";
                         else if (command == Command.Add)
-                            output += "[int] (<1000)";
+                            output += "[int] (0 < value < 1000)";
                         else
                             output += "[int]";
                         _rbtViewer.Out(Message.IncorrectArguments, output);
@@ -271,7 +271,7 @@ namespace algorythms_lab_3
                     return args is null || int.TryParse(args, out var _);
                 case Command.Add:
                     var b = int.TryParse(args, out var intArgs);
-                    return b && intArgs < 1000;
+                    return b && intArgs > 0 && intArgs < 1000 ;
                 case Command.Remove:
                 case Command.Find:
                 case Command.FindNext:

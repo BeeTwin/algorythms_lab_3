@@ -53,7 +53,7 @@ namespace algorythms_lab_3
             _messages[Message.Help2] = (message)
                 => $"Find [int], Min [(optional) int], Max [(optional) int], FindNext [int], FindPrev [int] ... Use \"Help 3\" ...";
             _messages[Message.Help3] = (message)
-                => $"All ints must be less than 1000.";
+                => $"All ints must be greater than 0 and less than 1000.";
             _messages[Message.Start] = (message)
                 => $"Use \"Help\" to see commands list.";
             _messages[Message.HelpPageNotFound] = (message)
@@ -100,7 +100,7 @@ namespace algorythms_lab_3
             Out(emptyLine, 1, 3);
         }
 
-        private void Out(string str, int x, int y)
+        private static void Out(string str, int x, int y)
         {
             SetCursorPosition(x, y);
             Write(str);
@@ -110,13 +110,17 @@ namespace algorythms_lab_3
         {
             if (node is null)
                 return -1;
+
             ColorOut(
                 node.Color == RedBlackTree<int>.Color.Black
-                    ? ConsoleColor.White : ConsoleColor.Black,
+                    ? ConsoleColor.White 
+                    : ConsoleColor.Black,
                 node.Color == RedBlackTree<int>.Color.Black
-                    ? ConsoleColor.DarkGray : ConsoleColor.Red,
+                    ? ConsoleColor.DarkGray 
+                    : ConsoleColor.Red,
                 node.Value.ToString() + new string(' ', 3 - node.Value.ToString().Length), x, y);
-            var loc = y;
+
+            var leftY = y;
 
             if (node.Right is not null)
             {
@@ -131,19 +135,19 @@ namespace algorythms_lab_3
 
             if (node.Left is not null)
             {
-                while (loc <= y)
+                while (leftY <= y)
                 {
-                    Out(" ║", x, loc + 1);
-                    loc++;
+                    Out(" ║", x, leftY + 1);
+                    leftY++;
                 }
                 y = DrawTree(node.Left, x, y + 2, isShowingNILs);
             }
             else if (isShowingNILs)
             {
-                while (loc <= y)
+                while (leftY <= y)
                 {
-                    Out(" ║", x, loc + 1);
-                    loc++;
+                    Out(" ║", x, leftY + 1);
+                    leftY++;
                 }
                 ColorOut(ConsoleColor.Black, ConsoleColor.DarkGray, "NIL", x, y + 2);
                 y += 2;

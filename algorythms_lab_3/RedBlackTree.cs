@@ -41,6 +41,56 @@ namespace algorythms_lab_3
             InsertCase_1(currentNode);
         }
 
+        private void InsertCase_1(Node node)
+        {
+            if (node.Parent is null)
+                node.Color = Color.Black;
+            else if (!IsBlack(node.Parent))
+                InsertCase_2(node);
+        }
+
+        private void InsertCase_2(Node node)
+        {
+            var uncle = node.Uncle;
+            if (!IsBlack(uncle))
+            {
+                node.Parent.Color = Color.Black;
+                uncle.Color = Color.Black;
+                var grandParent = node.GrandParent;
+                grandParent.Color = Color.Red;
+                InsertCase_1(grandParent);
+            }
+            else
+                InsertCase_3(node);
+        }
+
+        private void InsertCase_3(Node node)
+        {
+            if (!IsLeft(node) && IsLeft(node.Parent))
+            {
+                Rotate(node.Parent, Direction.Left);
+                node = node.Left;
+            }
+            else if (IsLeft(node) && !IsLeft(node.Parent))
+            {
+                Rotate(node.Parent, Direction.Right);
+                node = node.Right;
+            }
+
+            InsertCase_4(node);
+        }
+
+        private void InsertCase_4(Node node)
+        {
+            var grandParent = node.GrandParent;
+            node.Parent.Color = Color.Black;
+            grandParent.Color = Color.Red;
+            Rotate(grandParent, 
+                IsLeft(node) && IsLeft(node.Parent) 
+                    ? Direction.Right 
+                    : Direction.Left);
+        }
+
         public Node Find(T value)
         {
             var currentNode = Root;
@@ -89,14 +139,16 @@ namespace algorythms_lab_3
                 RemoveRed(node);
         }
 
+        private void RemoveWithSwap(Node node, Node swappingNode)
+        {
+            node.SwapValues(swappingNode);
+            Remove(swappingNode);
+        }
+
         private void RemoveRed(Node node)
         {
             if (node.Left is not null && node.Right is not null)
-            {
-                var swappingNode = node.Left.Max();
-                node.SwapValues(swappingNode);
-                Remove(swappingNode);
-            }
+                RemoveWithSwap(node, node.Left.Max());
             else
                 _ = IsLeft(node) ? node.Parent.Left = null : node.Parent.Right = null;
         }
@@ -104,38 +156,25 @@ namespace algorythms_lab_3
         private void RemoveBlack(Node node)
         {
             if (node.Left is not null && node.Right is not null)
-            {
-                var swappingNode = node.Left.Max();
-                node.SwapValues(swappingNode);
-                Remove(swappingNode);
-            }
+                RemoveWithSwap(node, node.Left.Max());
             else if (node.Left is not null && node.Right is null)
-            {
-                var swappingNode = node.Left;
-                node.SwapValues(swappingNode);
-                Remove(swappingNode);
-            }
+                RemoveWithSwap(node, node.Left);
             else if (node.Left is null && node.Right is not null)
-            {
-                var swappingNode = node.Right;
-                node.SwapValues(swappingNode);
-                Remove(swappingNode);
-            }
+                RemoveWithSwap(node, node.Right);
             else if (node == Root && node.Left is null && node.Right is null)
                 Root = null;
             else
             {
                 var isLeft = IsLeft(node);
-                FixRemovingBlackWithoutChildren(node, isLeft);
+                FixRemoving(node, isLeft);
                 _ = isLeft ? node.Parent.Left = null : node.Parent.Right = null;
             }
         }
 
-        private void FixRemovingBlackWithoutChildren(Node fixingNode, bool isLeft)
+        private void FixRemoving(Node fixingNode, bool isLeft)
         {
             var sibling = fixingNode.Sibling;
             var parent = fixingNode.Parent;
-            isLeft = !isLeft;
             if (!IsBlack(parent)
                 && IsBlack(sibling)
                 && IsBlack(sibling.Left)
@@ -146,47 +185,47 @@ namespace algorythms_lab_3
             }
             else if (!IsBlack(parent)
                 && IsBlack(sibling)
-                && (isLeft ? !IsBlack(sibling.Left) : !IsBlack(sibling.Right)))
+                && !IsBlack(isLeft ? sibling.Right : sibling.Left))
             {
                 parent.Color = Color.Black;
                 sibling.Color = Color.Red;
-                (isLeft ? sibling.Left : sibling.Right).Color = Color.Black;
-                Rotate(parent, isLeft ? Direction.Right : Direction.Left);
+                (isLeft ? sibling.Right : sibling.Left).Color = Color.Black; 
+                Rotate(parent, isLeft ? Direction.Left : Direction.Right);
             }
             else if (IsBlack(parent) 
                 && !IsBlack(sibling) 
-                && (isLeft ? sibling.Right is not null : sibling.Left is not null)
-                && IsBlack(isLeft ? sibling.Right?.Left : sibling.Left?.Left)
-                && IsBlack(isLeft ? sibling?.Right?.Right :sibling?.Left?.Right))
+                && (isLeft ? sibling.Left is not null : sibling.Right is not null)
+                && IsBlack(isLeft ? sibling.Left?.Left : sibling.Right?.Left)
+                && IsBlack(isLeft ? sibling.Left?.Right : sibling.Right?.Right))
             {
                 sibling.Color = Color.Black;
-                (isLeft ? sibling.Right : sibling.Left).Color = Color.Red;
-                Rotate(parent, isLeft ? Direction.Right : Direction.Left);
+                (isLeft ? sibling.Left : sibling.Right).Color = Color.Red;
+                Rotate(parent, isLeft ? Direction.Left : Direction.Right);
             }
             else if (IsBlack(parent)
                 && !IsBlack(sibling)
-                && (isLeft ? sibling.Right is not null : sibling.Left is not null)
-                && (isLeft ? IsBlack(sibling.Right) : IsBlack(sibling.Left))
-                && (isLeft ? !IsBlack(sibling.Right?.Left) : !IsBlack(sibling.Left?.Right)))
+                && (isLeft ? sibling.Left is not null : sibling.Right is not null)
+                && IsBlack(isLeft ? sibling.Left : sibling.Right)
+                && !IsBlack(isLeft ? sibling.Left?.Right : sibling.Right?.Left))
             {
-                (isLeft ? sibling.Right.Left : sibling.Left.Right).Color = Color.Black;
-                Rotate(sibling, isLeft ? Direction.Left : Direction.Right);
-                Rotate(parent, isLeft ? Direction.Right : Direction.Left);
+                (isLeft ? sibling.Left.Right : sibling.Right.Left).Color = Color.Black;
+                Rotate(sibling, isLeft ? Direction.Right : Direction.Left);
+                Rotate(parent, isLeft ? Direction.Left : Direction.Right);
             }
             else if (IsBlack(parent) 
-                && IsBlack(sibling)
-                && (isLeft ? !IsBlack(sibling.Right) : !IsBlack(sibling.Left)))
-            {
-                (isLeft ? sibling.Right : sibling.Left).Color = Color.Black;
-                Rotate(sibling, isLeft ? Direction.Left : Direction.Right);
-                Rotate(parent, isLeft ? Direction.Right : Direction.Left);
-            }
-            else if (IsBlack(parent)
                 && IsBlack(sibling)
                 && !IsBlack(isLeft ? sibling.Left : sibling.Right))
             {
                 (isLeft ? sibling.Left : sibling.Right).Color = Color.Black;
-                Rotate(parent, isLeft ? Direction.Right : Direction.Left);
+                Rotate(sibling, isLeft ? Direction.Right : Direction.Left);
+                Rotate(parent, isLeft ? Direction.Left : Direction.Right);
+            }
+            else if (IsBlack(parent)
+                && IsBlack(sibling)
+                && !IsBlack(isLeft ? sibling.Right : sibling.Left))
+            {
+                (isLeft ? sibling.Right : sibling.Left).Color = Color.Black;
+                Rotate(parent, isLeft ? Direction.Left : Direction.Right);
             }
             else if (IsBlack(parent)
                 && IsBlack(sibling)
@@ -195,65 +234,13 @@ namespace algorythms_lab_3
             {
                 sibling.Color = Color.Red;
                 if(parent != Root)
-                    FixRemovingBlackWithoutChildren(parent, IsLeft(parent));
+                    FixRemoving(parent, IsLeft(parent));
             }
         }
 
         public bool IsBlack(Node node) => node == null || node.Color == Color.Black;
 
         public bool IsLeft(Node node) => node == node.Parent.Left;
-
-        private void InsertCase_1(Node node)
-        {
-            if (node.Parent is null)
-                node.Color = Color.Black;
-            else if (node.Parent.Color == Color.Red)
-                InsertCase_2(node);
-        }
-
-        private void InsertCase_2(Node node)
-        {
-            var uncle = node.Uncle;
-            if (uncle is not null && uncle.Color == Color.Red)
-            {
-                node.Parent.Color = Color.Black;
-                uncle.Color = Color.Black;
-                var grandParent = node.GrandParent;
-                grandParent.Color = Color.Red;
-                InsertCase_1(grandParent);
-            }
-            else
-                InsertCase_3(node);
-        }
-
-        private void InsertCase_3(Node node)
-        {
-            var grandParent = node.GrandParent;
-            if (node == node.Parent.Right && node.Parent == grandParent.Left)
-            {
-                Rotate(node.Parent, Direction.Left);
-                node = node.Left;
-            }
-            else if (node == node.Parent.Left && node.Parent == grandParent.Right)
-            {
-                Rotate(node.Parent, Direction.Right);
-                node = node.Right;
-            }
-            InsertCase_4(node);
-        }
-
-        private void InsertCase_4(Node node)
-        {
-            var grandParent = node.GrandParent;
-            node.Parent.Color = Color.Black;
-            grandParent.Color = Color.Red;
-            Rotate(
-                grandParent, 
-                node == node.Parent.Left 
-                && node.Parent == grandParent.Left 
-                    ? Direction.Right 
-                    : Direction.Left);
-        }
 
         private void Rotate(Node node, Direction direction)
         {
@@ -321,7 +308,6 @@ namespace algorythms_lab_3
                 => Parent?.Parent;
 
             public Node Sibling
-                //=> CompareTo(Parent) < 0 ? Parent?.Right : Parent?.Left;
                 => this == Parent?.Left ? Parent?.Right : Parent?.Left;
             public Node Uncle
                 => Parent?.Sibling;
